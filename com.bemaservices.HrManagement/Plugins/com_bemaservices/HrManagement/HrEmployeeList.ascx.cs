@@ -482,11 +482,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
             }
 
             var qry = personService.Queryable().AsNoTracking();
-
-            if ( hiredPeople.Any() )
-            {
-                qry = qry.Where( p => hiredPeople.Contains( p.Id ) );
-            }
+            qry = qry.Where( p => hiredPeople.Contains( p.Id ) );
 
             if ( firedPeople.Any() )
             {
