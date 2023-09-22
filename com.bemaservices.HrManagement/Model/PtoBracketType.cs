@@ -22,6 +22,7 @@ using System.Runtime.Serialization;
 using Rock.Model;
 using Rock.Data;
 using System.ComponentModel.DataAnnotations;
+using Rock.Lava;
 
 namespace com.bemaservices.HrManagement.Model
 {
@@ -56,10 +57,10 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Virtual Properties
 
-        [LavaInclude]
+        [LavaVisibleAttribute]
         public virtual PtoBracket PtoBracket { get; set; }
 
-        [LavaInclude]
+        [LavaVisibleAttribute]
         public virtual PtoType PtoType { get; set; }
 
         #endregion

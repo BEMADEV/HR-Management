@@ -23,6 +23,7 @@ using Rock.Model;
 using Rock.Data;
 using System.ComponentModel.DataAnnotations;
 using System;
+using Rock.Lava;
 
 namespace com.bemaservices.HrManagement.Model
 {
@@ -62,10 +63,10 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Virtual Properties
 
-        [LavaInclude]
+        [LavaVisibleAttribute]
         public virtual PersonAlias ApproverPersonAlias { get; set; }
 
-        [LavaInclude]
+        [LavaVisibleAttribute]
         public virtual PtoAllocation PtoAllocation { get; set; }
 
         [DataMember]
