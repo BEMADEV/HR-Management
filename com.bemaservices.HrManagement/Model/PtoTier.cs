@@ -24,6 +24,7 @@ using Rock.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Rock.Lava;
 
 namespace com.bemaservices.HrManagement.Model
 {
@@ -66,7 +67,7 @@ namespace com.bemaservices.HrManagement.Model
         /// <value>
         /// A collection of <see cref="com.bemaservices.HrManagement.Model.PtoBracket">PtoBrackets</see> who are associated with the PtoTier.
         /// </value>
-        [LavaInclude]
+        [LavaVisibleAttribute]
         public virtual ICollection<PtoBracket> PtoBrackets
         {
             get { return _ptoBrackets ?? ( _ptoBrackets = new Collection<PtoBracket>() ); }

@@ -25,6 +25,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Rock.Lava;
 
 namespace com.bemaservices.HrManagement.Model
 {
@@ -57,13 +58,13 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Virtual Properties
 
-        [LavaInclude]
+        [LavaVisibleAttribute]
         public virtual PtoTier PtoTier { get; set; }
 
-        [LavaInclude]
+        [LavaVisibleAttribute]
         public virtual string Name { get { return ToString(); } }
 
-        [LavaInclude]
+        [LavaVisibleAttribute]
         public virtual ICollection<PtoBracketType> PtoBracketTypes
         {
             get { return _ptoBracketTypes ?? ( _ptoBracketTypes = new Collection<PtoBracketType>() ); }

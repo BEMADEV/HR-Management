@@ -184,7 +184,7 @@ namespace com.bemaservices.HrManagement.Jobs
                                                                                         && a.StartDate == calculatedFiscalStartDate
                                                                                         && a.EndDate == calculatedFiscalEndDate )
                                                                             .FirstOrDefault();
-                                    if ( ptoAllocation.IsNull() )
+                                    if ( ptoAllocation == null )
                                     {
                                         // Check if the Number of Hours worked attribute has been given
                                         int hoursToAllocate = 0;

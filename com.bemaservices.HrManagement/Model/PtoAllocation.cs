@@ -23,6 +23,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.ModelConfiguration;
 using System.Runtime.Serialization;
 using Rock.Data;
+using Rock.Lava;
 using Rock.Model;
 
 namespace com.bemaservices.HrManagement.Model
@@ -85,13 +86,13 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Virtual Properties
 
-        [LavaInclude]
+        [LavaVisibleAttribute]
         public virtual PtoType PtoType { get; set; }
 
-        [LavaInclude]
+        [LavaVisibleAttribute]
         public virtual PersonAlias PersonAlias { get; set; }
         
-        [LavaInclude]
+        [LavaVisibleAttribute]
         public virtual ICollection<PtoRequest> PtoRequests
         {
             get { return _ptoRequests ?? ( _ptoRequests = new Collection<PtoRequest>() ); }
