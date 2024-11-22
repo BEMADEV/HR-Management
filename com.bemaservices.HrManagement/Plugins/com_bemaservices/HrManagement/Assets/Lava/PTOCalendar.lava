@@ -21,7 +21,7 @@ Where a.Guid = '0A159929-0871-4115-AB10-C4943EAA5A7C'
 {% capture events %}
 [
 
-{% ptorequest where:'CreatedDateTime >= "{{ loadpastdate}}"' %}
+{% ptorequest where:'RequestDate >= "{{ loadpastdate }}"' %}
     {% for request in ptorequestItems %}
    {% assign allocation = request.PtoAllocation%}
         {% assign person = allocation.PersonAlias.Person%}
