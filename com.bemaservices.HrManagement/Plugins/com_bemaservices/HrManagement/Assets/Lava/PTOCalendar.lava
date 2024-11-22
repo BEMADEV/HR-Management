@@ -20,8 +20,7 @@ Where a.Guid = '0A159929-0871-4115-AB10-C4943EAA5A7C'
 {% assign loadpastdate = 'Now' | Date | DateAdd:-12,'M' %}
 {% capture events %}
 [
-
-{% ptorequest where:'RequestDate >= "{{ loadpastdate }}"' %}
+{% ptorequest where:'RequestDate >= "{{ loadpastdate }}"' limit:3000 %}
     {% for request in ptorequestItems %}
    {% assign allocation = request.PtoAllocation%}
         {% assign person = allocation.PersonAlias.Person%}
