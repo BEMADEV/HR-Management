@@ -428,7 +428,6 @@ namespace com.bemaservices.HrManagement.Field.Types
             var listSource = @"{% include '~/Plugins/com_bemaservices/HrManagement/Assets/Lava/PtoAllocationFieldTypeLava.lava'  %}";
 
             var options = new Rock.Lava.CommonMergeFieldsOptions();
-            options.GetLegacyGlobalMergeFields = false;
             var mergeFields = Rock.Lava.LavaHelper.GetCommonMergeFields( null, null, options );
 
             listSource = listSource.ResolveMergeFields( mergeFields, "RockEntity" );
@@ -441,7 +440,7 @@ namespace com.bemaservices.HrManagement.Field.Types
                 {
                     foreach ( DataRow row in dataTable.Rows )
                     {
-                        items.AddOrIgnore( row["value"].ToString(), row["text"].ToString() );
+                        items.AddOrReplace( row["value"].ToString(), row["text"].ToString() );
                     }
                 }
             }
@@ -453,7 +452,7 @@ namespace com.bemaservices.HrManagement.Field.Types
                     var keyValueArray = keyvalue.Split( new char[] { '^' }, StringSplitOptions.RemoveEmptyEntries );
                     if ( keyValueArray.Length > 0 )
                     {
-                        items.AddOrIgnore( keyValueArray[0].Trim(), keyValueArray.Length > 1 ? keyValueArray[1].Trim() : keyValueArray[0].Trim() );
+                        items.AddOrReplace( keyValueArray[0].Trim(), keyValueArray.Length > 1 ? keyValueArray[1].Trim() : keyValueArray[0].Trim() );
                     }
                 }
             }

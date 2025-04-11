@@ -187,7 +187,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
         /// <param name="e">The <see cref="EventArgs" /> instance containing the event data.</param>
         protected void rFilter_ApplyFilterClick( object sender, EventArgs e )
         {
-            rFilter.SaveUserPreference( MakeKeyUniqueToPtoTier( "Status" ), "Status", cbActive.Checked.ToTrueFalse() );
+            rFilter.SetFilterPreference( MakeKeyUniqueToPtoTier( "Status" ), "Status", cbActive.Checked.ToTrueFalse() );
 
             //if ( AvailableAttributes != null )
             //{
@@ -279,7 +279,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
                 {
                     if ( _canEdit || ptoBracket.IsAuthorized( Authorization.EDIT, CurrentPerson ) )
                     {
-                        string errorMessage;
+                        //string errorMessage;
                         //if ( !ptoBracketService.CanDelete( ptoBracket, out errorMessage ) )
                         //{
                         //    mdGridWarning.Show( errorMessage, ModalAlertType.Information );
@@ -370,7 +370,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
         /// </summary>
         private void SetFilter()
         {
-            string statusValue = rFilter.GetUserPreference( MakeKeyUniqueToPtoTier( "Status" ) );
+            string statusValue = rFilter.GetFilterPreference( MakeKeyUniqueToPtoTier( "Status" ) );
             if ( !string.IsNullOrWhiteSpace( statusValue ) )
             {
                 cbActive.Checked = statusValue.AsBoolean();

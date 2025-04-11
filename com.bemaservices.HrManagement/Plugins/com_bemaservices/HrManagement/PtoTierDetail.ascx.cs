@@ -43,7 +43,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
     [DisplayName( "PTO Tier Detail" )]
     [Category( "BEMA Services > HR Management" )]
     [Description( "Displays the details of the given PTO Tier for editing." )]
-    public partial class PtoTierDetail : RockBlock, IDetailBlock
+    public partial class PtoTierDetail : RockBlock
     {
         #region Control Methods
 

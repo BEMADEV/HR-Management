@@ -83,5 +83,6 @@ Select ptoAllocation.Guid as Value,
 From [dbo].[_com_bemaservices_HrManagement_PtoAllocation] ptoAllocation
 Join [dbo].[_com_bemaservices_HrManagement_PtoType] ptoType on ptoType.Id = ptoAllocation.PtoTypeId
 Join PersonAlias pa on pa.Id = ptoAllocation.PersonAliasId
-Where pa.Guid = @PersonAliasGuid
+Join PersonAlias pa1 on pa1.PersonId = pa.PersonId
+Where pa1.Guid = @PersonAliasGuid
 and ( ptoAllocation.PtoAllocationStatus = 1 or convert(nvarchar(max), ptoAllocation.Guid) = @PtoAllocationGuid )

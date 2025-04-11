@@ -45,7 +45,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
     [DisplayName( "PTO Allocation Detail" )]
     [Category( "BEMA Services > HR Management" )]
     [Description( "Displays the details of the given PTO Allocation for editing." )]
-    public partial class PtoAllocationDetail : RockBlock, IDetailBlock
+    public partial class PtoAllocationDetail : RockBlock
     {
         #region Control Methods
 

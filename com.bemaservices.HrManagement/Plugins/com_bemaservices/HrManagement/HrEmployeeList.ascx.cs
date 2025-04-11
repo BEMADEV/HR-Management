@@ -109,7 +109,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void gfEmployeeFilter_ClearFilterClick( object sender, EventArgs e )
         {
-            gfEmployeeFilter.DeleteUserPreferences();
+            gfEmployeeFilter.DeleteFilterPreferences();
             BindFilter();
         }
 
@@ -212,11 +212,11 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void gfEmployeeFilter_ApplyFilterClick( object sender, EventArgs e )
         {
-            gfEmployeeFilter.SaveUserPreference( "Fiscal Year End", ddlFiscalYearEnd.SelectedValue );
-            gfEmployeeFilter.SaveUserPreference( "Pto Type", ddlPtoType.SelectedValue );
-            gfEmployeeFilter.SaveUserPreference( "Supervisor", ppSupervisor.PersonId.ToString() );
-            gfEmployeeFilter.SaveUserPreference( "Ministry Area", tbMinistryArea.Text );
-            gfEmployeeFilter.SaveUserPreference( "Show Unallocated Pto Types", cbShowUnallocatedPtoTypes.Checked.ToTrueFalse() );
+            gfEmployeeFilter.SetFilterPreference( "Fiscal Year End", ddlFiscalYearEnd.SelectedValue );
+            gfEmployeeFilter.SetFilterPreference( "Pto Type", ddlPtoType.SelectedValue );
+            gfEmployeeFilter.SetFilterPreference( "Supervisor", ppSupervisor.PersonId.ToString() );
+            gfEmployeeFilter.SetFilterPreference( "Ministry Area", tbMinistryArea.Text );
+            gfEmployeeFilter.SetFilterPreference( "Show Unallocated Pto Types", cbShowUnallocatedPtoTypes.Checked.ToTrueFalse() );
 
             BindGrid();
         }
@@ -264,7 +264,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
                     var ptoTypes = ptoTypeService.Queryable().AsNoTracking().Where( pto => pto.IsActive == true );
 
                     // filter by Pto Type
-                    var ptoTypeId = gfEmployeeFilter.GetUserPreference( "Pto Type" ).AsIntegerOrNull();
+                    var ptoTypeId = gfEmployeeFilter.GetFilterPreference( "Pto Type" ).AsIntegerOrNull();
                     if ( ptoTypeId.HasValue && ptoTypeId != -1 )
                     {
                         ptoTypes = ptoTypes.Where( p => p.Id == ptoTypeId.Value );
@@ -281,7 +281,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
                                                     a.PtoAllocationStatus == PtoAllocationStatus.Active );
 
                     // Filter by fiscal year
-                    var fiscalYearEnd = gfEmployeeFilter.GetUserPreference( "Fiscal Year End" ).AsIntegerOrNull();
+                    var fiscalYearEnd = gfEmployeeFilter.GetFilterPreference( "Fiscal Year End" ).AsIntegerOrNull();
                     if ( fiscalYearEnd.HasValue && fiscalYearEnd != 0 )
                     {
                         //Get the currect fiscal start date to set the allocations dates.
@@ -325,7 +325,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
                             remainingHours = accruedHours - takenHours;
                         }
 
-                        var showUnallocatedPtoTypes = gfEmployeeFilter.GetUserPreference( "Show Unallocated Pto Types" ).AsBoolean();
+                        var showUnallocatedPtoTypes = gfEmployeeFilter.GetFilterPreference( "Show Unallocated Pto Types" ).AsBoolean();
                         if ( showUnallocatedPtoTypes || accruedHours > 0 || takenHours > 0 )
                         {
                             accruedItems.Add( String.Format( "{0}: {1}", name, accruedHours ) );
@@ -382,7 +382,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
             var ptoTypes = new PtoTypeService( new RockContext() ).Queryable().AsNoTracking().Where( x => x.IsActive == true ).ToList();
 
             ddlPtoType.DataSource = ptoTypes;
-            ddlPtoType.SetValue( gfEmployeeFilter.GetUserPreference( "Pto Type" ) );
+            ddlPtoType.SetValue( gfEmployeeFilter.GetFilterPreference( "Pto Type" ) );
             ddlPtoType.DataBind();
             ddlPtoType.Items.Insert( 0, Rock.Constants.All.ListItem );
 
@@ -392,24 +392,24 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
                 ddlFiscalYearEnd.Items.Add( new ListItem( RockDateTime.Now.AddYears( yearOffset ).Year.ToString() ) );
             }
             ddlFiscalYearEnd.Items.Insert( 0, Rock.Constants.None.ListItem );
-            ddlFiscalYearEnd.SetValue( gfEmployeeFilter.GetUserPreference( "Fiscal Year End" ) );
+            ddlFiscalYearEnd.SetValue( gfEmployeeFilter.GetFilterPreference( "Fiscal Year End" ) );
 
             var ministryAreaAttributeGuid = GetAttributeValue( "MinistryArea" ).AsGuidOrNull();
             if ( ministryAreaAttributeGuid.HasValue )
             {
-                tbMinistryArea.Text = gfEmployeeFilter.GetUserPreference( "Ministry Area" );
+                tbMinistryArea.Text = gfEmployeeFilter.GetFilterPreference( "Ministry Area" );
             }
             else
             {
                 tbMinistryArea.Visible = false;
             }
 
-            cbShowUnallocatedPtoTypes.Checked = gfEmployeeFilter.GetUserPreference( "Show Unallocated Pto Types" ).AsBoolean( );
+            cbShowUnallocatedPtoTypes.Checked = gfEmployeeFilter.GetFilterPreference( "Show Unallocated Pto Types" ).AsBoolean( );
 
             var supervisorAttributeGuid = GetAttributeValue( "Supervisor" ).AsGuidOrNull();
             if ( supervisorAttributeGuid.HasValue )
             {
-                var personId = gfEmployeeFilter.GetUserPreference( "Supervisor" ).AsIntegerOrNull();
+                var personId = gfEmployeeFilter.GetFilterPreference( "Supervisor" ).AsIntegerOrNull();
                 ppSupervisor.PersonId = personId;
                 if ( personId.HasValue )
                 {
@@ -449,7 +449,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
             var calculatedFiscalEndDate = calculatedFiscalStartDate.AddYears( 1 ).AddDays( -1 );
 
             // Filter by fiscal year
-            var fiscalYearEnd = gfEmployeeFilter.GetUserPreference( "Fiscal Year End" ).AsIntegerOrNull();
+            var fiscalYearEnd = gfEmployeeFilter.GetFilterPreference( "Fiscal Year End" ).AsIntegerOrNull();
             if ( fiscalYearEnd.HasValue && fiscalYearEnd != 0 )
             {
                 calculatedFiscalStartDate = new DateTime( fiscalYearEnd.Value - 1, fiscalStartMonth, fiscalStartDay );
@@ -492,7 +492,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
             // filter by supervisor
             if ( supervisorAttributeGuid.HasValue )
             {
-                var personId = gfEmployeeFilter.GetUserPreference( "Supervisor" ).AsIntegerOrNull();
+                var personId = gfEmployeeFilter.GetFilterPreference( "Supervisor" ).AsIntegerOrNull();
                 if ( personId.HasValue )
                 {
                     qry = qry.WhereAttributeValue( rockContext, x => x.Attribute.Guid == supervisorAttributeGuid.Value && x.ValueAsPersonId == personId.Value );
@@ -510,7 +510,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
             // filter by ministry area
             if ( ministryAreaAttributeGuid.HasValue )
             {
-                var ministryArea = gfEmployeeFilter.GetUserPreference( "Ministry Area" );
+                var ministryArea = gfEmployeeFilter.GetFilterPreference( "Ministry Area" );
                 if ( ministryArea.IsNotNullOrWhiteSpace() )
                 {
                     qry = qry.WhereAttributeValue( rockContext, x => x.Attribute.Guid == ministryAreaAttributeGuid.Value && x.Value == ministryArea );

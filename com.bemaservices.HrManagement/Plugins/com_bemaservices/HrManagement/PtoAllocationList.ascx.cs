@@ -109,7 +109,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void gfPtoAllocationFilter_ClearFilterClick( object sender, EventArgs e )
         {
-            gfPtoAllocationFilter.DeleteUserPreferences();
+            gfPtoAllocationFilter.DeleteFilterPreferences();
             ppPerson.PersonId = null;
             BindFilter();
         }
@@ -346,11 +346,11 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void gfPtoAllocationFilter_ApplyFilterClick( object sender, EventArgs e )
         {
-            gfPtoAllocationFilter.SaveUserPreference( "Date Range", drpAllocationDate.DelimitedValues );
-            gfPtoAllocationFilter.SaveUserPreference( "Status", ddlStatus.SelectedValue );
-            gfPtoAllocationFilter.SaveUserPreference( "Pto Type", ddlPtoType.SelectedValue );
-            gfPtoAllocationFilter.SaveUserPreference( "Source Type", ddlSourceType.SelectedValue );
-            gfPtoAllocationFilter.SaveUserPreference( "Person", ppPerson.PersonId.ToString() );
+            gfPtoAllocationFilter.SetFilterPreference( "Date Range", drpAllocationDate.DelimitedValues );
+            gfPtoAllocationFilter.SetFilterPreference( "Status", ddlStatus.SelectedValue );
+            gfPtoAllocationFilter.SetFilterPreference( "Pto Type", ddlPtoType.SelectedValue );
+            gfPtoAllocationFilter.SetFilterPreference( "Source Type", ddlSourceType.SelectedValue );
+            gfPtoAllocationFilter.SetFilterPreference( "Person", ppPerson.PersonId.ToString() );
 
             BindGrid();
         }
@@ -566,7 +566,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
         {
             ddlStatus.BindToEnum<PtoAllocationStatus>();
             ddlStatus.Items.Insert( 0, Rock.Constants.All.ListItem );
-            string statusFilter = gfPtoAllocationFilter.GetUserPreference( "Status" );
+            string statusFilter = gfPtoAllocationFilter.GetFilterPreference( "Status" );
             if ( !string.IsNullOrWhiteSpace( statusFilter ) )
             {
                 ddlStatus.SetValue( statusFilter );
@@ -577,19 +577,19 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
             ddlPtoType.DataSource = ptoTypes;
             ddlPtoType.DataBind();
             ddlPtoType.Items.Insert( 0, Rock.Constants.All.ListItem );
-            ddlPtoType.SetValue( gfPtoAllocationFilter.GetUserPreference( "Pto Type" ) );
+            ddlPtoType.SetValue( gfPtoAllocationFilter.GetFilterPreference( "Pto Type" ) );
 
             ddlSourceType.BindToEnum<PtoAllocationSourceType>();
             ddlSourceType.Items.Insert( 0, Rock.Constants.All.ListItem );
-            string sourceType = gfPtoAllocationFilter.GetUserPreference( "Source Type" );
+            string sourceType = gfPtoAllocationFilter.GetFilterPreference( "Source Type" );
             if ( !string.IsNullOrWhiteSpace( sourceType ) )
             {
                 ddlSourceType.SetValue( sourceType );
             }
 
-            drpAllocationDate.DelimitedValues = gfPtoAllocationFilter.GetUserPreference( "Date Range" );
+            drpAllocationDate.DelimitedValues = gfPtoAllocationFilter.GetFilterPreference( "Date Range" );
 
-            var personId = gfPtoAllocationFilter.GetUserPreference( "Person" ).AsIntegerOrNull();
+            var personId = gfPtoAllocationFilter.GetFilterPreference( "Person" ).AsIntegerOrNull();
             ppPerson.PersonId = personId;
             if ( personId.HasValue )
             {
@@ -681,7 +681,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
             }
 
             // filter by date
-            string dateRangeValue = gfPtoAllocationFilter.GetUserPreference( "Date Range" );
+            string dateRangeValue = gfPtoAllocationFilter.GetFilterPreference( "Date Range" );
             if ( !string.IsNullOrWhiteSpace( dateRangeValue ) )
             {
                 var drp = new DateRangePicker();
@@ -699,28 +699,28 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
             }
 
             // filter by status
-            var status = gfPtoAllocationFilter.GetUserPreference( "Status" ).ConvertToEnumOrNull<PtoAllocationStatus>();
+            var status = gfPtoAllocationFilter.GetFilterPreference( "Status" ).ConvertToEnumOrNull<PtoAllocationStatus>();
             if ( status.HasValue )
             {
                 qry = qry.Where( b => b.PtoAllocationStatus == status );
             }
 
             // filter by Pto Type
-            var ptoTypeId = gfPtoAllocationFilter.GetUserPreference( "Pto Type" ).AsIntegerOrNull();
+            var ptoTypeId = gfPtoAllocationFilter.GetFilterPreference( "Pto Type" ).AsIntegerOrNull();
             if ( ptoTypeId.HasValue && ptoTypeId != -1 )
             {
                 qry = qry.Where( a => a.PtoTypeId == ptoTypeId.Value );
             }
 
             // filter Source Type
-            var sourceType = gfPtoAllocationFilter.GetUserPreference( "Source Type" ).ConvertToEnumOrNull<PtoAllocationSourceType>();
+            var sourceType = gfPtoAllocationFilter.GetFilterPreference( "Source Type" ).ConvertToEnumOrNull<PtoAllocationSourceType>();
             if ( sourceType.HasValue )
             {
                 qry = qry.Where( a => a.PtoAllocationSourceType == sourceType.Value );
             }
 
             // filter by person
-            var personId = gfPtoAllocationFilter.GetUserPreference( "Person" ).AsIntegerOrNull();
+            var personId = gfPtoAllocationFilter.GetFilterPreference( "Person" ).AsIntegerOrNull();
             if ( personId.HasValue )
             {
                 qry = qry.Where( b => b.PersonAlias.PersonId == personId.Value );

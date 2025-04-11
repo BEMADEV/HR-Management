@@ -44,7 +44,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
     [DisplayName( "PTO Bracket Detail" )]
     [Category( "BEMA Services > HR Management" )]
     [Description( "Displays the details of the given PTO Bracket for editing." )]
-    public partial class PtoBracketDetail : RockBlock, IDetailBlock
+    public partial class PtoBracketDetail : RockBlock
     {
         #region Fields
 
