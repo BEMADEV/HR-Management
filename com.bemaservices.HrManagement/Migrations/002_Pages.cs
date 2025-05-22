@@ -161,7 +161,7 @@ namespace com.bemaservices.HrManagement.Migrations
 
             // Page: Human Resources
             RockMigrationHelper.AddPage( "BF04BB7E-BE3A-4A38-A37C-386B55496303", "F66758C6-3E3D-4598-AF4C-B317047B5987", "Human Resources", "", "34A9F1E4-8249-4F39-B861-F28210E8C70A", "" ); // Site:Rock RMS
-            RockMigrationHelper.AddPageRoute( "34A9F1E4-8249-4F39-B861-F28210E8C70A", "Person/{PersonId}/HR" );
+            RockMigrationHelper.AddOrUpdatePageRoute( "34A9F1E4-8249-4F39-B861-F28210E8C70A", "Person/{PersonId}/HR" );
             RockMigrationHelper.UpdateBlockType( "HTML Content", "Adds an editable HTML fragment to the page.", "~/Blocks/Cms/HtmlContentDetail.ascx", "CMS", "19B61D65-37E3-459F-A44F-DEF0089118A3" );
             RockMigrationHelper.UpdateBlockType( "Attribute Values", "Allows for editing the value(s) of a set of attributes for person.", "~/Blocks/Crm/PersonDetail/AttributeValues.ascx", "CRM > Person Detail", "D70A59DC-16BE-43BE-9880-59598FA7A94C" );
             RockMigrationHelper.UpdateBlockType( "Pto Allocation List", "Lists all the pto allocations.", "~/Plugins/com_bemaservices/HrManagement/PtoAllocationList.ascx", "BEMA Services > HR Management", "9A7FDFF1-21DE-4BF5-9598-690224E98FFC" );

@@ -24,6 +24,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using Newtonsoft.Json;
 using Rock;
+using Rock.Lava;
 using Rock.Attribute;
 using Rock.Data;
 using Rock.Model;
@@ -760,7 +761,7 @@ namespace RockWeb.Plugins.com_bemaservices.HrManagement
 
         #region Helper Class
 
-        public class AllocationRow : DotLiquid.Drop
+        public class AllocationRow : LavaDataObject
         {
             public int Id { get; set; }
             public string Name { get; set; }
