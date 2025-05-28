@@ -10,6 +10,7 @@ using Rock;
 using Rock.Attribute;
 using Rock.Communication;
 using Rock.Data;
+using Rock.Jobs;
 using Rock.Model;
 using Rock.Web.Cache;
 
@@ -70,11 +71,10 @@ namespace com.bemaservices.HrManagement.Jobs
         , 8
         , "HoursWorked" )]
     [IntegerField( "Hours Per Week", "This is used in conjuntion with the Hours a person works.  This is the number of hours someone should work to recieve the full PTO Allocation", true, 40, "", 9, "HoursPerWeek" )]
-    public class ProcessPtoAllocations : IJob
+    public class ProcessPtoAllocations : RockJob
     {
-        public virtual void Execute( IJobExecutionContext context )
+        public override void Execute()
         {
-            JobDataMap dataMap = context.JobDetail.JobDataMap;
 
             RockContext rockContext = new RockContext();
             PersonService personService = new PersonService( rockContext );
@@ -82,10 +82,10 @@ namespace com.bemaservices.HrManagement.Jobs
             PtoAllocationService ptoAllocationService = new PtoAllocationService( rockContext );
             PtoTierService ptoTierService = new PtoTierService( rockContext );
 
-            var updateAllocationStatus = dataMap.GetString( "UpdateAllocationStatus" ).AsBoolean();
+            var updateAllocationStatus = GetAttributeValue( "UpdateAllocationStatus" ).AsBoolean();
 
-            var defaultStatusValue = dataMap.GetString( "NewAllocationsStatus" ).AsIntegerOrNull();
-            var defaultScheduleValue = dataMap.GetString( "NewAllocationAccrualSchedule" ).AsIntegerOrNull();
+            var defaultStatusValue = GetAttributeValue( "NewAllocationsStatus" ).AsIntegerOrNull();
+            var defaultScheduleValue = GetAttributeValue( "NewAllocationAccrualSchedule" ).AsIntegerOrNull();
 
             PtoAllocationStatus defaultStatus = PtoAllocationStatus.Pending;
             PtoAccrualSchedule defaultSchedule = PtoAccrualSchedule.Yearly;
@@ -100,8 +100,8 @@ namespace com.bemaservices.HrManagement.Jobs
                 defaultSchedule = ( PtoAccrualSchedule ) defaultScheduleValue.Value;
             }
 
-            var daysOffset = dataMap.GetString( "DaysBack" ).AsIntegerOrNull();
-            var yearOffset = dataMap.GetString( "YearOffset" ).AsInteger();
+            var daysOffset = GetAttributeValue( "DaysBack" ).AsIntegerOrNull();
+            var yearOffset = GetAttributeValue( "YearOffset" ).AsInteger();
 
             DateTime todayOffset = RockDateTime.Now;
             if ( daysOffset.HasValue )
@@ -109,19 +109,19 @@ namespace com.bemaservices.HrManagement.Jobs
                 todayOffset = todayOffset.AddDays( daysOffset.Value );
             }
 
-            var hireDateAttributeGuid = dataMap.GetString( "HireDate" ).AsGuidOrNull();
-            var fireDateAttributeGuid = dataMap.GetString( "FireDate" ).AsGuidOrNull();
+            var hireDateAttributeGuid = GetAttributeValue( "HireDate" ).AsGuidOrNull();
+            var fireDateAttributeGuid = GetAttributeValue( "FireDate" ).AsGuidOrNull();
 
             if ( !hireDateAttributeGuid.HasValue || !fireDateAttributeGuid.HasValue )
             {
-                context.UpdateLastStatusMessage( "Hire date or Fire Date was not provided" );
+                this.UpdateLastStatusMessage( "Hire date or Fire Date was not provided" );
             }
 
-            var ptoTypeGuids = dataMap.GetString( "PtoTypes" ).Split( ',' ).AsGuidList();
+            var ptoTypeGuids = GetAttributeValue( "PtoTypes" ).Split( ',' ).AsGuidList();
 
             if ( ptoTypeGuids.Count < 1 )
             {
-                context.UpdateLastStatusMessage( "No Pto Types were selected." );
+                this.UpdateLastStatusMessage( "No Pto Types were selected." );
             }
 
             //Get the currect fiscal start date to set the allocations dates.
@@ -189,10 +189,10 @@ namespace com.bemaservices.HrManagement.Jobs
                                         // Check if the Number of Hours worked attribute has been given
                                         int hoursToAllocate = 0;
 
-                                        var hoursWorkedAttributeGuid = dataMap.GetString( "HoursWorked" ).AsGuidOrNull();
+                                        var hoursWorkedAttributeGuid = GetAttributeValue( "HoursWorked" ).AsGuidOrNull();
                                         if ( hoursWorkedAttributeGuid.HasValue )
                                         {
-                                            var hoursPerWeek = dataMap.GetInt( "HoursPerWeek" );
+                                            var hoursPerWeek = GetAttributeValue( "HoursPerWeek" ).AsInteger();
                                             var hoursWorked = person.GetAttributeValue( AttributeCache.Get( hoursWorkedAttributeGuid.Value.ToString() ).Key ).AsIntegerOrNull() ?? hoursPerWeek;
 
                                             decimal percent = ( decimal ) hoursWorked / hoursPerWeek;
@@ -264,7 +264,7 @@ namespace com.bemaservices.HrManagement.Jobs
 
             rockContext.SaveChanges();
 
-            context.Result = string.Format( "{0} Allocations have been added</br>{1} Allocations have been activated</br>{2} Allocations have been inactivated", recordsAdded, recordsActivated, recordsInactivated );
+            this.Result = string.Format( "{0} Allocations have been added</br>{1} Allocations have been activated</br>{2} Allocations have been inactivated", recordsAdded, recordsActivated, recordsInactivated );
         }
     }
 }

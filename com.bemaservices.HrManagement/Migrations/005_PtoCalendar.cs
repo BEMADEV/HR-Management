@@ -56,7 +56,7 @@ namespace com.bemaservices.HrManagement.Migrations
 
             // Page: Vue PTO Calendar
             RockMigrationHelper.AddPage( "0A39E59F-D733-47D8-9953-BB30B5C33A27", "2E169330-D7D7-4ECA-B417-72C64BE150F0", "Vue PTO Calendar", "", "D7984E66-C3B7-41E9-9AFC-9F7D5124612F", "" ); // Site:Rock RMS
-            RockMigrationHelper.AddPageRoute( "D7984E66-C3B7-41E9-9AFC-9F7D5124612F", "ptovuecalendar" );
+            RockMigrationHelper.AddOrUpdatePageRoute( "D7984E66-C3B7-41E9-9AFC-9F7D5124612F", "ptovuecalendar" );
             RockMigrationHelper.UpdateBlockType( "HTML Content", "Adds an editable HTML fragment to the page.", "~/Blocks/Cms/HtmlContentDetail.ascx", "CMS", "19B61D65-37E3-459F-A44F-DEF0089118A3" );
             // Add Block to Page: Vue PTO Calendar, Site: Rock RMS
             RockMigrationHelper.AddBlock( true, "D7984E66-C3B7-41E9-9AFC-9F7D5124612F", "", "19B61D65-37E3-459F-A44F-DEF0089118A3", "HTML Content", "Main", "", "", 0, "FBE2780E-5E33-4C3D-809A-0CE4884B9FC0" );
