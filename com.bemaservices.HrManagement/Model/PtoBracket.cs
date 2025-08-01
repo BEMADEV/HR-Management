@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright by BEMA Information Technologies
+// Copyright by BEMA Software Services
 //
 // Licensed under the Rock Community License (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,18 +39,34 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Entity Properties
 
+        /// <summary>
+        /// Gets or sets the pto tier identifier.
+        /// </summary>
+        /// <value>The pto tier identifier.</value>
         [Required]
         [DataMember]
         public int PtoTierId { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is active.
+        /// </summary>
+        /// <value><c>true</c> if this instance is active; otherwise, <c>false</c>.</value>
         [Required]
         [DataMember]
         public bool IsActive { get; set; }
 
+        /// <summary>
+        /// Gets or sets the minimum year.
+        /// </summary>
+        /// <value>The minimum year.</value>
         [Required]
         [DataMember]
         public int MinimumYear { get; set; }
 
+        /// <summary>
+        /// Gets or sets the maximum year.
+        /// </summary>
+        /// <value>The maximum year.</value>
         [DataMember]
         public int? MaximumYear { get; set; }
 
@@ -58,12 +74,24 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Virtual Properties
 
+        /// <summary>
+        /// Gets or sets the pto tier.
+        /// </summary>
+        /// <value>The pto tier.</value>
         [LavaVisibleAttribute]
         public virtual PtoTier PtoTier { get; set; }
 
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>The name.</value>
         [LavaVisibleAttribute]
         public virtual string Name { get { return ToString(); } }
 
+        /// <summary>
+        /// Gets or sets the pto bracket types.
+        /// </summary>
+        /// <value>The pto bracket types.</value>
         [LavaVisibleAttribute]
         public virtual ICollection<PtoBracketType> PtoBracketTypes
         {
@@ -71,10 +99,17 @@ namespace com.bemaservices.HrManagement.Model
             set { _ptoBracketTypes = value; }
         }
 
+        /// <summary>
+        /// The pto bracket types
+        /// </summary>
         private ICollection<PtoBracketType> _ptoBracketTypes;
 
         #endregion
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
         public override string ToString()
         {
 
@@ -98,7 +133,7 @@ namespace com.bemaservices.HrManagement.Model
     public partial class PtoBracketConfiguration : EntityTypeConfiguration<PtoBracket>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PtoBracketConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="PtoBracketConfiguration" /> class.
         /// </summary>
         public PtoBracketConfiguration()
         {

@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright by BEMA Information Technologies
+// Copyright by BEMA Software Services
 //
 // Licensed under the Rock Community License (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ using Rock.Data;
 namespace com.bemaservices.HrManagement.Model
 {
     /// <summary>
-    /// 
+    /// Class PtoRequestService.
+    /// Implements the <see cref="Rock.Data.Service{com.bemaservices.HrManagement.Model.PtoRequest}" />
     /// </summary>
+    /// <seealso cref="Rock.Data.Service{com.bemaservices.HrManagement.Model.PtoRequest}" />
     public class PtoRequestService : Service<PtoRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PtoBracketTypeService"/> class.
+        /// Initializes a new instance of the <see cref="PtoBracketTypeService" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         public PtoRequestService( RockContext context ) : base( context ) { }

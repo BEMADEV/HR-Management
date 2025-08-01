@@ -1,4 +1,20 @@
-﻿using System;
+﻿// <copyright>
+// Copyright by BEMA Software Services
+//
+// Licensed under the Rock Community License (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.rockrms.com/license
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+//
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -18,6 +34,13 @@ using Rock.Web.UI.Controls;
 
 namespace com.bemaservices.HrManagement.Field.Types
 {
+    /// <summary>
+    /// Class PtoTypeFieldType.
+    /// Implements the <see cref="FieldType" />
+    /// Implements the <see cref="IEntityFieldType" />
+    /// </summary>
+    /// <seealso cref="FieldType" />
+    /// <seealso cref="IEntityFieldType" />
     class PtoTypeFieldType : Rock.Field.FieldType, IEntityFieldType
     {
 
@@ -30,7 +53,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// <param name="value">Information about the value</param>
         /// <param name="configurationValues">The configuration values.</param>
         /// <param name="condensed">Flag indicating if the value should be condensed (i.e. for use in a grid column)</param>
-        /// <returns></returns>
+        /// <returns>System.String.</returns>
         public override string FormatValue( System.Web.UI.Control parentControl, string value, Dictionary<string, ConfigurationValue> configurationValues, bool condensed )
         {
             string formattedValue = value;
@@ -55,10 +78,8 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// Creates the control(s) necessary for prompting user for a new value
         /// </summary>
         /// <param name="configurationValues">The configuration values.</param>
-        /// <param name="id"></param>
-        /// <returns>
-        /// The control
-        /// </returns>
+        /// <param name="id">The id.</param>
+        /// <returns>The control</returns>
         public override System.Web.UI.Control EditControl( Dictionary<string, ConfigurationValue> configurationValues, string id )
         {
             var ptoTypePicker = new PtoTypePicker { ID = id };
@@ -83,7 +104,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// </summary>
         /// <param name="control">Parent control that controls were added to in the CreateEditControl() method</param>
         /// <param name="configurationValues">The configuration values.</param>
-        /// <returns></returns>
+        /// <returns>System.String.</returns>
         public override string GetEditValue( System.Web.UI.Control control, Dictionary<string, ConfigurationValue> configurationValues )
         {
             PtoTypePicker ptoTypePicker = control as PtoTypePicker;
@@ -136,7 +157,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// <param name="id">The identifier.</param>
         /// <param name="required">if set to <c>true</c> [required].</param>
         /// <param name="filterMode">The filter mode.</param>
-        /// <returns></returns>
+        /// <returns>Control.</returns>
         public override Control FilterCompareControl( Dictionary<string, ConfigurationValue> configurationValues, string id, bool required, FilterMode filterMode )
         {
             var lbl = new Label();
@@ -157,7 +178,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// <param name="id">The identifier.</param>
         /// <param name="required">if set to <c>true</c> [required].</param>
         /// <param name="filterMode">The filter mode.</param>
-        /// <returns></returns>
+        /// <returns>Control.</returns>
         public override Control FilterValueControl( Dictionary<string, ConfigurationValue> configurationValues, string id, bool required, FilterMode filterMode )
         {
             var cbList = new RockCheckBoxList();
@@ -185,7 +206,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// </summary>
         /// <param name="configurationValues">The configuration values.</param>
         /// <param name="value">The value.</param>
-        /// <returns></returns>
+        /// <returns>System.String.</returns>
         public override string FormatFilterValueValue( Dictionary<string, ConfigurationValue> configurationValues, string value )
         {
             var ptoTypeGuids = value.SplitDelimitedValues().AsGuidList();
@@ -200,7 +221,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// </summary>
         /// <param name="control">The control.</param>
         /// <param name="filterMode">The filter mode.</param>
-        /// <returns></returns>
+        /// <returns>System.String.</returns>
         public override string GetFilterCompareValue( Control control, FilterMode filterMode )
         {
             return null;
@@ -209,7 +230,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// <summary>
         /// Gets the equal to compare value (types that don't support an equalto comparison (i.e. singleselect) should return null
         /// </summary>
-        /// <returns></returns>
+        /// <returns>System.String.</returns>
         public override string GetEqualToCompareValue()
         {
             return null;
@@ -220,7 +241,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// </summary>
         /// <param name="control">The control.</param>
         /// <param name="configurationValues">The configuration values.</param>
-        /// <returns></returns>
+        /// <returns>System.String.</returns>
         public override string GetFilterValueValue( Control control, Dictionary<string, ConfigurationValue> configurationValues )
         {
             var values = new List<string>();
@@ -275,7 +296,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// <param name="configurationValues">The configuration values.</param>
         /// <param name="filterValues">The filter values.</param>
         /// <param name="parameterExpression">The parameter expression.</param>
-        /// <returns></returns>
+        /// <returns>Expression.</returns>
         public override Expression AttributeFilterExpression( Dictionary<string, ConfigurationValue> configurationValues, List<string> filterValues, ParameterExpression parameterExpression )
         {
             if ( filterValues.Count == 1 )
@@ -301,7 +322,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// </summary>
         /// <param name="control">The control.</param>
         /// <param name="configurationValues">The configuration values.</param>
-        /// <returns></returns>
+        /// <returns>System.Nullable&lt;System.Int32&gt;.</returns>
         public int? GetEditValueAsEntityId( System.Web.UI.Control control, Dictionary<string, ConfigurationValue> configurationValues )
         {
             Guid guid = GetEditValue( control, configurationValues ).AsGuid();
@@ -330,7 +351,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// Gets the entity.
         /// </summary>
         /// <param name="value">The value.</param>
-        /// <returns></returns>
+        /// <returns>IEntity.</returns>
         public IEntity GetEntity( string value )
         {
             return GetEntity( value, null );
@@ -341,7 +362,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="rockContext">The rock context.</param>
-        /// <returns></returns>
+        /// <returns>IEntity.</returns>
         public IEntity GetEntity( string value, RockContext rockContext )
         {
             Guid? guid = value.AsGuidOrNull();

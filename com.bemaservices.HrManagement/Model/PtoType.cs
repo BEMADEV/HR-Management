@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright by BEMA Information Technologies
+// Copyright by BEMA Software Services
 //
 // Licensed under the Rock Community License (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,25 +36,49 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Entity Properties
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is active.
+        /// </summary>
+        /// <value><c>true</c> if this instance is active; otherwise, <c>false</c>.</value>
         [Required]
         [DataMember]
         public bool IsActive { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>The name.</value>
         [Required]
         [MaxLength( 100 )]
         [DataMember]
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
         [DataMember]
         public string Description { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is negative time balance allowed.
+        /// </summary>
+        /// <value><c>true</c> if this instance is negative time balance allowed; otherwise, <c>false</c>.</value>
         [DataMember]
         public bool IsNegativeTimeBalanceAllowed { get; set; }
 
+        /// <summary>
+        /// Gets or sets the color.
+        /// </summary>
+        /// <value>The color.</value>
         [DataMember]
         [MaxLength( 100 )]
         public string Color { get; set; }
 
+        /// <summary>
+        /// Gets or sets the workflow type identifier.
+        /// </summary>
+        /// <value>The workflow type identifier.</value>
         [DataMember]
         public int? WorkflowTypeId { get; set; }
 
@@ -62,6 +86,10 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Virtual Properties
 
+        /// <summary>
+        /// Gets or sets the type of the workflow.
+        /// </summary>
+        /// <value>The type of the workflow.</value>
         [LavaVisibleAttribute]
         public virtual WorkflowType WorkflowType { get; set; }
 
@@ -69,6 +97,10 @@ namespace com.bemaservices.HrManagement.Model
 
         #region methods
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
         public override string ToString()
         {
             return this.Name;
@@ -85,7 +117,7 @@ namespace com.bemaservices.HrManagement.Model
     public partial class PtoTypeConfiguration : EntityTypeConfiguration<PtoType>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PtoTypeConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="PtoTypeConfiguration" /> class.
         /// </summary>
         public PtoTypeConfiguration()
         {

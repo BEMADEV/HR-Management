@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright by BEMA Information Technologies
+// Copyright by BEMA Software Services
 //
 // Licensed under the Rock Community License (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,16 +21,24 @@ using Rock.Data;
 namespace com.bemaservices.HrManagement.Model
 {
     /// <summary>
-    /// 
+    /// Class PtoTypeService.
+    /// Implements the <see cref="Rock.Data.Service{com.bemaservices.HrManagement.Model.PtoType}" />
     /// </summary>
+    /// <seealso cref="Rock.Data.Service{com.bemaservices.HrManagement.Model.PtoType}" />
     public class PtoTypeService : Service<PtoType>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PtoTypeService"/> class.
+        /// Initializes a new instance of the <see cref="PtoTypeService" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         public PtoTypeService( RockContext context ) : base( context ) { }
 
+        /// <summary>
+        /// Determines whether this instance can delete the specified pto type.
+        /// </summary>
+        /// <param name="ptoType">Type of the pto.</param>
+        /// <param name="errorMessage">The error message.</param>
+        /// <returns><c>true</c> if this instance can delete the specified pto type; otherwise, <c>false</c>.</returns>
         public bool CanDelete( PtoType ptoType, out string errorMessage )
         {
             errorMessage = string.Empty;

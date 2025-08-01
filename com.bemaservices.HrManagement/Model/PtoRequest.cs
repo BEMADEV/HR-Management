@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright by BEMA Information Technologies
+// Copyright by BEMA Software Services
 //
 // Licensed under the Rock Community License (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,24 +37,48 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Entity Properties
 
+        /// <summary>
+        /// Gets or sets the request date.
+        /// </summary>
+        /// <value>The request date.</value>
         [Required]
         [DataMember]
         public DateTime RequestDate { get; set; }
 
+        /// <summary>
+        /// Gets or sets the hours.
+        /// </summary>
+        /// <value>The hours.</value>
         [Required]
         [DataMember]
         public decimal Hours { get; set; }
 
+        /// <summary>
+        /// Gets or sets the pto allocation identifier.
+        /// </summary>
+        /// <value>The pto allocation identifier.</value>
         [DataMember]
         public int PtoAllocationId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the approver person alias identifier.
+        /// </summary>
+        /// <value>The approver person alias identifier.</value>
         [DataMember]
         public int? ApproverPersonAliasId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the state of the pto request approval.
+        /// </summary>
+        /// <value>The state of the pto request approval.</value>
         [Required]
         [DataMember]
         public PtoRequestApprovalState PtoRequestApprovalState { get; set; }
 
+        /// <summary>
+        /// Gets or sets the reason.
+        /// </summary>
+        /// <value>The reason.</value>
         [Required]
         [DataMember]
         public string Reason { get; set; }
@@ -63,12 +87,24 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Virtual Properties
 
+        /// <summary>
+        /// Gets or sets the approver person alias.
+        /// </summary>
+        /// <value>The approver person alias.</value>
         [LavaVisibleAttribute]
         public virtual PersonAlias ApproverPersonAlias { get; set; }
 
+        /// <summary>
+        /// Gets or sets the pto allocation.
+        /// </summary>
+        /// <value>The pto allocation.</value>
         [LavaVisibleAttribute]
         public virtual PtoAllocation PtoAllocation { get; set; }
 
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>The name.</value>
         [DataMember]
         [NotMapped]
         public virtual string Name
@@ -97,7 +133,7 @@ namespace com.bemaservices.HrManagement.Model
     public partial class PtoRequestConfiguration : EntityTypeConfiguration<PtoRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PtoBracketTypeConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="PtoBracketTypeConfiguration" /> class.
         /// </summary>
         public PtoRequestConfiguration()
         {
@@ -112,14 +148,29 @@ namespace com.bemaservices.HrManagement.Model
     #endregion
 
     #region Enumerations
+    /// <summary>
+    /// Enum PtoRequestApprovalState
+    /// </summary>
     public enum PtoRequestApprovalState
     {
+        /// <summary>
+        /// The pending
+        /// </summary>
         Pending = 0,
-        
+
+        /// <summary>
+        /// The approved
+        /// </summary>
         Approved = 1,
-        
+
+        /// <summary>
+        /// The denied
+        /// </summary>
         Denied = 2,
-        
+
+        /// <summary>
+        /// The cancelled
+        /// </summary>
         Cancelled = 3
     }
 

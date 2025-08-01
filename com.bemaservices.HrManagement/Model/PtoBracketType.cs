@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright by BEMA Information Technologies
+// Copyright by BEMA Software Services
 //
 // Licensed under the Rock Community License (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,31 +35,55 @@ namespace com.bemaservices.HrManagement.Model
     {
 
         #region Entity Properties
-        
+
+        /// <summary>
+        /// Gets or sets the pto bracket identifier.
+        /// </summary>
+        /// <value>The pto bracket identifier.</value>
         [Required]
         [DataMember]
         public int PtoBracketId { get; set; }
-        
+
+        /// <summary>
+        /// Gets or sets the pto type identifier.
+        /// </summary>
+        /// <value>The pto type identifier.</value>
         [Required]
         [DataMember]
         public int PtoTypeId { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is active.
+        /// </summary>
+        /// <value><c>true</c> if this instance is active; otherwise, <c>false</c>.</value>
         [Required]
         [DataMember]
         public bool IsActive { get; set; }
 
+        /// <summary>
+        /// Gets or sets the default hours.
+        /// </summary>
+        /// <value>The default hours.</value>
         [Required]
         [DataMember]
         public int DefaultHours { get; set; }
-        
-        
+
+
         #endregion
 
         #region Virtual Properties
 
+        /// <summary>
+        /// Gets or sets the pto bracket.
+        /// </summary>
+        /// <value>The pto bracket.</value>
         [LavaVisibleAttribute]
         public virtual PtoBracket PtoBracket { get; set; }
 
+        /// <summary>
+        /// Gets or sets the type of the pto.
+        /// </summary>
+        /// <value>The type of the pto.</value>
         [LavaVisibleAttribute]
         public virtual PtoType PtoType { get; set; }
 
@@ -74,7 +98,7 @@ namespace com.bemaservices.HrManagement.Model
     public partial class PtoBracketTypeConfiguration : EntityTypeConfiguration<PtoBracketType>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PtoBracketTypeConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="PtoBracketTypeConfiguration" /> class.
         /// </summary>
         public PtoBracketTypeConfiguration()
         {

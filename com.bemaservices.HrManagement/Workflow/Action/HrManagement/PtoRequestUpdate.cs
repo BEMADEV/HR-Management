@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright by BEMA Information Technologies
+// Copyright by BEMA Software Services
 //
 // Licensed under the Rock Community License (the "License");
 // you may not use this file except in compliance with the License.
@@ -63,14 +63,41 @@ namespace com.bemaservices.HrManagement.Workflow.Action
 
     public class PtoRequestUpdate : ActionComponent
     {
+        /// <summary>
+        /// The pto request attribute key
+        /// </summary>
         private const string PTO_REQUEST_ATTRIBUTE_KEY = "PTO_REQUEST_ATTRIBUTE_KEY";
+        /// <summary>
+        /// The startdate key
+        /// </summary>
         private const string STARTDATE_KEY = "STARTDATE_KEY";
+        /// <summary>
+        /// The enddate key
+        /// </summary>
         private const string ENDDATE_KEY = "ENDDATE_KEY";
+        /// <summary>
+        /// The hours key
+        /// </summary>
         private const string HOURS_KEY = "HOURS_KEY";
+        /// <summary>
+        /// The pto reason key
+        /// </summary>
         private const string PTO_REASON_KEY = "PTO_REASON_KEY";
+        /// <summary>
+        /// The allocation key
+        /// </summary>
         private const string ALLOCATION_KEY = "ALLOCATION_KEY";
+        /// <summary>
+        /// The approver key
+        /// </summary>
         private const string APPROVER_KEY = "APPROVER_KEY";
+        /// <summary>
+        /// The approval state key
+        /// </summary>
         private const string APPROVAL_STATE_KEY = "APPROVAL_STATE_KEY";
+        /// <summary>
+        /// The exclude weekends key
+        /// </summary>
         private const string EXCLUDE_WEEKENDS_KEY = "EXCLUDE_WEEKENDS_KEY";
 
         /// <summary>
@@ -80,7 +107,7 @@ namespace com.bemaservices.HrManagement.Workflow.Action
         /// <param name="action">The action.</param>
         /// <param name="entity">The entity.</param>
         /// <param name="errorMessages">The error messages.</param>
-        /// <returns></returns>
+        /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
         public override bool Execute( RockContext rockContext, WorkflowAction action, Object entity, out List<string> errorMessages )
         {
             errorMessages = new List<string>();

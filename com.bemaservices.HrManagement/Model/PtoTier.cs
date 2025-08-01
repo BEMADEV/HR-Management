@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright by BEMA Information Technologies
+// Copyright by BEMA Software Services
 //
 // Licensed under the Rock Community License (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,22 +38,42 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Entity Properties
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is active.
+        /// </summary>
+        /// <value><c>true</c> if this instance is active; otherwise, <c>false</c>.</value>
         [Required]
         [DataMember]
         public bool IsActive { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>The name.</value>
         [Required]
         [MaxLength( 100 )]
         [DataMember]
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
         [DataMember]
         public string Description { get; set; }
 
+        /// <summary>
+        /// Gets or sets the color.
+        /// </summary>
+        /// <value>The color.</value>
         [DataMember]
         [MaxLength( 100 )]
         public string Color { get; set; }
 
+        /// <summary>
+        /// Gets or sets the days of week.
+        /// </summary>
+        /// <value>The days of week.</value>
         [DataMember]
         public string DaysOfWeek { get; set; }
 
@@ -64,9 +84,7 @@ namespace com.bemaservices.HrManagement.Model
         /// <summary>
         /// Gets or sets a collection containing the <see cref="com.bemaservices.HrManagement.Model.PtoBracket">PtoBrackets</see> who are associated with the PtoTier.
         /// </summary>
-        /// <value>
-        /// A collection of <see cref="com.bemaservices.HrManagement.Model.PtoBracket">PtoBrackets</see> who are associated with the PtoTier.
-        /// </value>
+        /// <value>A collection of <see cref="com.bemaservices.HrManagement.Model.PtoBracket">PtoBrackets</see> who are associated with the PtoTier.</value>
         [LavaVisibleAttribute]
         public virtual ICollection<PtoBracket> PtoBrackets
         {
@@ -74,6 +92,9 @@ namespace com.bemaservices.HrManagement.Model
             set { _ptoBrackets = value; }
         }
 
+        /// <summary>
+        /// The pto brackets
+        /// </summary>
         private ICollection<PtoBracket> _ptoBrackets;
         #endregion
     }
@@ -86,7 +107,7 @@ namespace com.bemaservices.HrManagement.Model
     public partial class PtoTierConfiguration : EntityTypeConfiguration<PtoTier>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PtoTierConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="PtoTierConfiguration" /> class.
         /// </summary>
         public PtoTierConfiguration()
         {

@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright by BEMA Information Technologies
+// Copyright by BEMA Software Services
 //
 // Licensed under the Rock Community License (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,16 +21,23 @@ using Rock.Data;
 namespace com.bemaservices.HrManagement.Model
 {
     /// <summary>
-    /// 
+    /// Class PtoTierService.
+    /// Implements the <see cref="Rock.Data.Service{com.bemaservices.HrManagement.Model.PtoTier}" />
     /// </summary>
+    /// <seealso cref="Rock.Data.Service{com.bemaservices.HrManagement.Model.PtoTier}" />
     public class PtoTierService : Service<PtoTier>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PtoTierService"/> class.
+        /// Initializes a new instance of the <see cref="PtoTierService" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         public PtoTierService( RockContext context ) : base( context ) { }
 
+        /// <summary>
+        /// Initializes the model.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="model">The model.</param>
         private void InitModel<T>( ref T model ) where T : Rock.Data.IModel
         {
             model.CreatedByPersonAlias = null;
@@ -43,6 +50,11 @@ namespace com.bemaservices.HrManagement.Model
             model.Guid = Guid.NewGuid();
         }
 
+        /// <summary>
+        /// Copies the specified pto tier identifier.
+        /// </summary>
+        /// <param name="ptoTierId">The pto tier identifier.</param>
+        /// <returns>System.Int32.</returns>
         public int Copy( int ptoTierId )
         {
             var ptoTier = this.Get( ptoTierId );
@@ -90,6 +102,9 @@ namespace com.bemaservices.HrManagement.Model
 
     }
 
+    /// <summary>
+    /// Class PtoTeirExtensionMethods.
+    /// </summary>
     public static partial class PtoTeirExtensionMethods
     {
         /// <summary>
@@ -97,7 +112,7 @@ namespace com.bemaservices.HrManagement.Model
         /// </summary>
         /// <param name="source">The source.</param>
         /// <param name="deepCopy">if set to <c>true</c> a deep copy is made. If false, only the basic entity properties are copied.</param>
-        /// <returns></returns>
+        /// <returns>PtoTier.</returns>
         public static PtoTier Clone( this PtoTier source, bool deepCopy )
         {
             if ( deepCopy )

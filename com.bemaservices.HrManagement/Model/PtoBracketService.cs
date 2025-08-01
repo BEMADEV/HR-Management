@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright by BEMA Information Technologies
+// Copyright by BEMA Software Services
 //
 // Licensed under the Rock Community License (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,18 +19,23 @@ using Rock.Data;
 namespace com.bemaservices.HrManagement.Model
 {
     /// <summary>
-    /// 
+    /// Class PtoBracketService.
+    /// Implements the <see cref="Rock.Data.Service{com.bemaservices.HrManagement.Model.PtoBracket}" />
     /// </summary>
+    /// <seealso cref="Rock.Data.Service{com.bemaservices.HrManagement.Model.PtoBracket}" />
     public class PtoBracketService : Service<PtoBracket>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PtoBracketService"/> class.
+        /// Initializes a new instance of the <see cref="PtoBracketService" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         public PtoBracketService( RockContext context ) : base( context ) { }
 
     }
 
+    /// <summary>
+    /// Class PtoBracketExtensionMethods.
+    /// </summary>
     public static partial class PtoBracketExtensionMethods
     {
         /// <summary>
@@ -38,7 +43,7 @@ namespace com.bemaservices.HrManagement.Model
         /// </summary>
         /// <param name="source">The source.</param>
         /// <param name="deepCopy">if set to <c>true</c> a deep copy is made. If false, only the basic entity properties are copied.</param>
-        /// <returns></returns>
+        /// <returns>PtoBracket.</returns>
         public static PtoBracket Clone( this PtoBracket source, bool deepCopy )
         {
             if ( deepCopy )

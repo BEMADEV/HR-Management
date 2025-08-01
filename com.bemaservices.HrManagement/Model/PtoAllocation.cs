@@ -1,5 +1,5 @@
 ﻿// <copyright>
-// Copyright by BEMA Information Technologies
+// Copyright by BEMA Software Services
 //
 // Licensed under the Rock Community License (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,39 +37,79 @@ namespace com.bemaservices.HrManagement.Model
     {
 
         #region Entity Properties
-        
+
+        /// <summary>
+        /// Gets or sets the pto type identifier.
+        /// </summary>
+        /// <value>The pto type identifier.</value>
         [Required]
         [DataMember]
         public int PtoTypeId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the start date.
+        /// </summary>
+        /// <value>The start date.</value>
         [Required]
         [DataMember]
         public DateTime StartDate { get; set; }
 
+        /// <summary>
+        /// Gets or sets the end date.
+        /// </summary>
+        /// <value>The end date.</value>
         [DataMember]
         public DateTime? EndDate { get; set; }
 
+        /// <summary>
+        /// Gets or sets the hours.
+        /// </summary>
+        /// <value>The hours.</value>
         [DataMember]
         public decimal Hours { get; set; }
 
+        /// <summary>
+        /// Gets or sets the pto accrual schedule.
+        /// </summary>
+        /// <value>The pto accrual schedule.</value>
         [DataMember]
         public PtoAccrualSchedule PtoAccrualSchedule { get; set; }
 
+        /// <summary>
+        /// Gets or sets the type of the pto allocation source.
+        /// </summary>
+        /// <value>The type of the pto allocation source.</value>
         [Required]
         [DataMember]
         public PtoAllocationSourceType PtoAllocationSourceType { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last processed date.
+        /// </summary>
+        /// <value>The last processed date.</value>
         [DataMember]
         public DateTime? LastProcessedDate { get; set; }
 
+        /// <summary>
+        /// Gets or sets the pto allocation status.
+        /// </summary>
+        /// <value>The pto allocation status.</value>
         [Required]
         [DataMember]
         public PtoAllocationStatus PtoAllocationStatus { get; set; }
 
+        /// <summary>
+        /// Gets or sets the person alias identifier.
+        /// </summary>
+        /// <value>The person alias identifier.</value>
         [Required]
         [DataMember]
         public int PersonAliasId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the note.
+        /// </summary>
+        /// <value>The note.</value>
         [DataMember]
         public string Note { get; set; }
 
@@ -77,6 +117,10 @@ namespace com.bemaservices.HrManagement.Model
 
         #region methods
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
         public override string ToString()
         {
             return PtoType.Name + " " + this.StartDate.ToString( "M/yyyy") + ( this.EndDate.HasValue ? " - " + this.EndDate.Value.ToString("M/yyyy") : string.Empty ); 
@@ -86,12 +130,24 @@ namespace com.bemaservices.HrManagement.Model
 
         #region Virtual Properties
 
+        /// <summary>
+        /// Gets or sets the type of the pto.
+        /// </summary>
+        /// <value>The type of the pto.</value>
         [LavaVisibleAttribute]
         public virtual PtoType PtoType { get; set; }
 
+        /// <summary>
+        /// Gets or sets the person alias.
+        /// </summary>
+        /// <value>The person alias.</value>
         [LavaVisibleAttribute]
         public virtual PersonAlias PersonAlias { get; set; }
-        
+
+        /// <summary>
+        /// Gets or sets the pto requests.
+        /// </summary>
+        /// <value>The pto requests.</value>
         [LavaVisibleAttribute]
         public virtual ICollection<PtoRequest> PtoRequests
         {
@@ -99,6 +155,9 @@ namespace com.bemaservices.HrManagement.Model
             set { _ptoRequests = value; }
         }
 
+        /// <summary>
+        /// The pto requests
+        /// </summary>
         private ICollection<PtoRequest> _ptoRequests;
         #endregion
     }
@@ -111,7 +170,7 @@ namespace com.bemaservices.HrManagement.Model
     public partial class PtoAllocationConfiguration : EntityTypeConfiguration<PtoAllocation>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PtoAllocationConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="PtoAllocationConfiguration" /> class.
         /// </summary>
         public PtoAllocationConfiguration()
         {
@@ -125,27 +184,72 @@ namespace com.bemaservices.HrManagement.Model
     #endregion
 
     #region Enumerations
+    /// <summary>
+    /// Enum PtoAccrualSchedule
+    /// </summary>
     public enum PtoAccrualSchedule
     {
+        /// <summary>
+        /// The none
+        /// </summary>
         None = 0,
+        /// <summary>
+        /// The yearly
+        /// </summary>
         Yearly = 1,
+        /// <summary>
+        /// The quarterly
+        /// </summary>
         Quarterly = 2,
+        /// <summary>
+        /// The monthly
+        /// </summary>
         Monthly = 3,
+        /// <summary>
+        /// The weekly
+        /// </summary>
         Weekly = 4
     }
 
+    /// <summary>
+    /// Enum PtoAllocationSourceType
+    /// </summary>
     public enum PtoAllocationSourceType
     {
+        /// <summary>
+        /// The automatic
+        /// </summary>
         Automatic = 1,
+        /// <summary>
+        /// The manual
+        /// </summary>
         Manual = 2,
+        /// <summary>
+        /// The request
+        /// </summary>
         Request = 3
     }
 
+    /// <summary>
+    /// Enum PtoAllocationStatus
+    /// </summary>
     public enum PtoAllocationStatus
     {
+        /// <summary>
+        /// The inactive
+        /// </summary>
         Inactive = 0,
+        /// <summary>
+        /// The active
+        /// </summary>
         Active = 1,
+        /// <summary>
+        /// The pending
+        /// </summary>
         Pending = 2,
+        /// <summary>
+        /// The denied
+        /// </summary>
         Denied = 3
     }
     #endregion
