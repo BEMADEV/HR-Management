@@ -23,6 +23,7 @@ using Rock;
 using Rock.Data;
 using Rock.Field;
 using Rock.Field.Types;
+using Rock.SystemGuid;
 using Rock.ViewModels.Utility;
 using Rock.Web.Cache;
 
@@ -35,6 +36,7 @@ namespace com.bemaservices.HrManagement.Field.Types
     /// </summary>
     /// <seealso cref="FieldType" />
     /// <seealso cref="IEntityFieldType" />
+    [FieldTypeGuid( "81FD3C9B-E22A-492F-9212-93546BBE6677" )]
     class PtoTypeFieldType : UniversalItemPickerFieldType, IEntityFieldType
     {
         /// <summary>

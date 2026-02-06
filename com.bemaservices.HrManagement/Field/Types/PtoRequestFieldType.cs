@@ -23,6 +23,7 @@ using Rock;
 using Rock.Data;
 using Rock.Field;
 using Rock.Field.Types;
+using Rock.SystemGuid;
 using Rock.ViewModels.Utility;
 using Rock.Web.Cache;
 
@@ -35,6 +36,7 @@ namespace com.bemaservices.HrManagement.Field.Types
     /// </summary>
     /// <seealso cref="UniversalItemPickerFieldType" />
     /// <seealso cref="IEntityFieldType" />
+    [FieldTypeGuid( "90ECF283-5344-4168-9224-E0D26E9B7ECB" )]
     class PtoRequestFieldType : UniversalItemPickerFieldType, IEntityFieldType
     {
         /// <summary>
@@ -46,6 +48,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         {
 
             return new PtoRequestService( new RockContext() ).Queryable()
+            .ToList()
             .Select( item => new ListItemBag
             {
                 Value = item.Guid.ToString(),
@@ -66,6 +69,7 @@ namespace com.bemaservices.HrManagement.Field.Types
         {
             return new PtoRequestService( new RockContext() ).Queryable()
             .Where( item => values.Contains( item.Guid.ToString() ) )
+            .ToList()
             .Select( item => new ListItemBag
             {
                 Value = item.Guid.ToString(),
