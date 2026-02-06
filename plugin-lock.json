@@ -1,0 +1,36 @@
+{
+  "lockFileVersion": 1,
+  "versions": [
+    {
+      "version": "1.1.10",
+      "installedFiles": [
+        "Bin/com.bemaservices.HrManagement.dll",
+        "Plugins/com_bemaservices/HrManagement/.gitignore",
+        "Plugins/com_bemaservices/HrManagement/Assets/Lava/PtoAllocationFieldTypeLava.lava",
+        "Plugins/com_bemaservices/HrManagement/Assets/Lava/PTOCalendar.lava",
+        "Plugins/com_bemaservices/HrManagement/Assets/Lava/ptoCalendarIframe.lava",
+        "Plugins/com_bemaservices/HrManagement/Assets/Lava/TimeOffCalendar.lava",
+        "Plugins/com_bemaservices/HrManagement/Assets/Lava/TimeOffSummary.lava",
+        "Plugins/com_bemaservices/HrManagement/Assets/Sql/TimeOffCalendar.sql",
+        "Plugins/com_bemaservices/HrManagement/HrEmployeeList.ascx",
+        "Plugins/com_bemaservices/HrManagement/HrEmployeeList.ascx.cs",
+        "Plugins/com_bemaservices/HrManagement/PtoAllocationDetail.ascx",
+        "Plugins/com_bemaservices/HrManagement/PtoAllocationDetail.ascx.cs",
+        "Plugins/com_bemaservices/HrManagement/PtoAllocationList.ascx",
+        "Plugins/com_bemaservices/HrManagement/PtoAllocationList.ascx.cs",
+        "Plugins/com_bemaservices/HrManagement/PtoBracketDetail.ascx",
+        "Plugins/com_bemaservices/HrManagement/PtoBracketDetail.ascx.cs",
+        "Plugins/com_bemaservices/HrManagement/PtoBracketList.ascx",
+        "Plugins/com_bemaservices/HrManagement/PtoBracketList.ascx.cs",
+        "Plugins/com_bemaservices/HrManagement/PtoRequestList.ascx",
+        "Plugins/com_bemaservices/HrManagement/PtoRequestList.ascx.cs",
+        "Plugins/com_bemaservices/HrManagement/PtoTierDetail.ascx",
+        "Plugins/com_bemaservices/HrManagement/PtoTierDetail.ascx.cs",
+        "Plugins/com_bemaservices/HrManagement/PtoTierList.ascx",
+        "Plugins/com_bemaservices/HrManagement/PtoTierList.ascx.cs",
+        "Plugins/com_bemaservices/HrManagement/PtoTypeList.ascx",
+        "Plugins/com_bemaservices/HrManagement/PtoTypeList.ascx.cs"
+      ]
+    }
+  ]
+}

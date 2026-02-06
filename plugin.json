@@ -1,0 +1,14 @@
+{
+    "organization": {
+        "name": "BEMA Software Services",
+        "code": "com.bemaservices"
+    },
+    "name": "Hr Management",
+    "version": "1.1.10",
+    "include": {
+        "com.bemaservices.HrManagement/bin/Release/net472/com.bemaservices.HrManagement.dll": "Bin/",
+        "com.bemaservices.HrManagement.Obsidian/dist/**": "Plugins/com_bemaservices/HrManagement",
+        "WebForms/**": "Plugins/com_bemaservices/HrManagement"
+    },
+    "exclude": []
+}
