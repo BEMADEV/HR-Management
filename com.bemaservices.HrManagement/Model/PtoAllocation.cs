@@ -22,6 +22,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.ModelConfiguration;
 using System.Runtime.Serialization;
+using com.bemaservices.HrManagement.Enums;
 using Rock.Data;
 using Rock.Lava;
 using Rock.Model;
@@ -32,6 +33,7 @@ namespace com.bemaservices.HrManagement.Model
     /// A Reservation Location
     /// </summary>
     [Table( "_com_bemaservices_HrManagement_PtoAllocation" )]
+    [Rock.SystemGuid.EntityTypeGuid( "198A76A9-9EA0-4030-B8B2-526ADE69C268" )]
     [DataContract]
     public class PtoAllocation : Rock.Data.Model<PtoAllocation>, Rock.Data.IRockEntity
     {
@@ -181,76 +183,5 @@ namespace com.bemaservices.HrManagement.Model
         }
     }
 
-    #endregion
-
-    #region Enumerations
-    /// <summary>
-    /// Enum PtoAccrualSchedule
-    /// </summary>
-    public enum PtoAccrualSchedule
-    {
-        /// <summary>
-        /// The none
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// The yearly
-        /// </summary>
-        Yearly = 1,
-        /// <summary>
-        /// The quarterly
-        /// </summary>
-        Quarterly = 2,
-        /// <summary>
-        /// The monthly
-        /// </summary>
-        Monthly = 3,
-        /// <summary>
-        /// The weekly
-        /// </summary>
-        Weekly = 4
-    }
-
-    /// <summary>
-    /// Enum PtoAllocationSourceType
-    /// </summary>
-    public enum PtoAllocationSourceType
-    {
-        /// <summary>
-        /// The automatic
-        /// </summary>
-        Automatic = 1,
-        /// <summary>
-        /// The manual
-        /// </summary>
-        Manual = 2,
-        /// <summary>
-        /// The request
-        /// </summary>
-        Request = 3
-    }
-
-    /// <summary>
-    /// Enum PtoAllocationStatus
-    /// </summary>
-    public enum PtoAllocationStatus
-    {
-        /// <summary>
-        /// The inactive
-        /// </summary>
-        Inactive = 0,
-        /// <summary>
-        /// The active
-        /// </summary>
-        Active = 1,
-        /// <summary>
-        /// The pending
-        /// </summary>
-        Pending = 2,
-        /// <summary>
-        /// The denied
-        /// </summary>
-        Denied = 3
-    }
     #endregion
 }

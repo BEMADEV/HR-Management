@@ -21,6 +21,7 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Reflection;
+using com.bemaservices.HrManagement.Enums;
 using com.bemaservices.HrManagement.Model;
 using Rock;
 using Rock.Attribute;
