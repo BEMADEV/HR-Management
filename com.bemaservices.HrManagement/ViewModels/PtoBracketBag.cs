@@ -1,4 +1,5 @@
 using Rock.ViewModels.Utility;
+using System.Collections.Generic;
 
 namespace com.bemaservices.HrManagement.ViewModels
 {
@@ -12,5 +13,7 @@ namespace com.bemaservices.HrManagement.ViewModels
         public int? MaximumYear { get; set; }
 
         public int MinimumYear { get; set; }
+
+        public List<PtoBracketTypeBag> PtoBracketTypes { get; set; }
     }
 }

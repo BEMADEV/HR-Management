@@ -32,6 +32,7 @@ using Rock.Web.UI;
 using Rock.Web.UI.Controls;
 
 using com.bemaservices.HrManagement.Model;
+using com.bemaservices.HrManagement.Enums;
 
 namespace RockWeb.Plugins.com_bemaservices.HrManagement
 {

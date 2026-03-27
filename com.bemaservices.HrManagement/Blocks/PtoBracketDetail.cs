@@ -81,7 +81,16 @@ namespace com.bemaservices.HrManagement.Blocks
         /// <returns>The options that provide additional details to the block.</returns>
         private PtoBracketDetailOptionsBag GetBoxOptions( bool isEditable )
         {
-            var options = new PtoBracketDetailOptionsBag();
+            var options = new PtoBracketDetailOptionsBag
+            {
+                PtoTypeOptions = new PtoTypeService( RockContext )
+                    .Queryable()
+                    .OrderBy( pt => pt.Name )
+                    .Select( pt => pt )
+                    .ToList()
+                    .Select( pt => pt.ToListItemBag() )
+                    .ToList()
+            };
 
             return options;
         }
@@ -95,6 +104,16 @@ namespace com.bemaservices.HrManagement.Blocks
         /// <returns><c>true</c> if the PtoBracket is valid, <c>false</c> otherwise.</returns>
         private bool ValidatePtoBracket( PtoBracket ptoBracket, out string errorMessage )
         {
+            var hasBracketTypes = ptoBracket.Id == 0
+                ? ptoBracket.PtoBracketTypes.Any()
+                : new PtoBracketTypeService( RockContext ).Queryable().Any( pbt => pbt.PtoBracketId == ptoBracket.Id );
+
+            if ( !hasBracketTypes )
+            {
+                errorMessage = "At least one PTO Type needs to be configured.";
+                return false;
+            }
+
             errorMessage = null;
 
             return true;
@@ -163,7 +182,20 @@ namespace com.bemaservices.HrManagement.Blocks
                 IdKey = entity.IdKey,
                 IsActive = entity.IsActive,
                 MaximumYear = entity.MaximumYear,
-                MinimumYear = entity.MinimumYear
+                MinimumYear = entity.MinimumYear,
+                PtoBracketTypes = ( entity.Id == 0
+                    ? new List<PtoBracketType>()
+                    : new PtoBracketTypeService( RockContext ).Queryable()
+                        .Where( pbt => pbt.PtoBracketId == entity.Id )
+                        .ToList() )
+                    .Select( pbt => new PtoBracketTypeBag
+                    {
+                        DefaultHours = pbt.DefaultHours,
+                        Guid = pbt.Guid.ToString(),
+                        IsActive = pbt.IsActive,
+                        PtoType = pbt.PtoType?.ToListItemBag()
+                    } )
+                    .ToList()
             };
         }
 
@@ -223,6 +255,50 @@ namespace com.bemaservices.HrManagement.Blocks
 
             box.IfValidProperty( nameof( box.Bag.MinimumYear ),
                 () => entity.MinimumYear = box.Bag.MinimumYear );
+
+            box.IfValidProperty( nameof( box.Bag.PtoBracketTypes ),
+                () =>
+                {
+                    var ptoBracketTypeService = new PtoBracketTypeService( RockContext );
+                    var incomingPtoBracketTypes = box.Bag.PtoBracketTypes ?? new List<PtoBracketTypeBag>();
+                    var existingPtoBracketTypes = entity.Id == 0
+                        ? new List<PtoBracketType>()
+                        : ptoBracketTypeService.Queryable().Where( pbt => pbt.PtoBracketId == entity.Id ).ToList();
+
+                    var incomingGuids = incomingPtoBracketTypes
+                        .Select( pbt => pbt.Guid.AsGuidOrNull() )
+                        .Where( g => g.HasValue )
+                        .Select( g => g.Value )
+                        .ToList();
+
+                    foreach ( var existingPtoBracketType in existingPtoBracketTypes.Where( pbt => !incomingGuids.Contains( pbt.Guid ) ).ToList() )
+                    {
+                        ptoBracketTypeService.Delete( existingPtoBracketType );
+                    }
+
+                    foreach ( var incomingPtoBracketType in incomingPtoBracketTypes )
+                    {
+                        var incomingGuid = incomingPtoBracketType.Guid.AsGuidOrNull() ?? Guid.NewGuid();
+                        var existingPtoBracketType = existingPtoBracketTypes.FirstOrDefault( pbt => pbt.Guid == incomingGuid );
+
+                        if ( existingPtoBracketType == null )
+                        {
+                            existingPtoBracketType = new PtoBracketType
+                            {
+                                Guid = incomingGuid,
+                                PtoBracket = entity
+                            };
+
+                            ptoBracketTypeService.Add( existingPtoBracketType );
+                        }
+
+                        var ptoTypeId = incomingPtoBracketType.PtoType.GetEntityId<PtoType>( RockContext );
+
+                        existingPtoBracketType.PtoTypeId = ptoTypeId.GetValueOrDefault();
+                        existingPtoBracketType.DefaultHours = incomingPtoBracketType.DefaultHours;
+                        existingPtoBracketType.IsActive = incomingPtoBracketType.IsActive;
+                    }
+                } );
 
             box.IfValidProperty( nameof( box.Bag.AttributeValues ),
                 () =>

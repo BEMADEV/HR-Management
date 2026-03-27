@@ -10,22 +10,24 @@
           @selectItem="onSelectItem">
         <SelectColumn />
 
-        <BooleanColumn name="isActive"
-                       title="Is Active"
-                       field="isActive"
-                       visiblePriority="xs" />
+        <TextColumn name="name"
+                    title="Name"
+                    field="name"
+                    :filter="textValueFilter"
+                    visiblePriority="xs" />
 
-        <NumberColumn name="maximumYear"
-                       title="Maximum Year"
-                       field="maximumYear"
-                       :filter="numberValueFilter"
-                       visiblePriority="xs" />
+        <HtmlColumn name="summary"
+                    title="Summary"
+                    field="summary"
+                    visiblePriority="xs"
+                    wrapped />
 
-        <NumberColumn name="minimumYear"
-                       title="Minimum Year"
-                       field="minimumYear"
-                       :filter="numberValueFilter"
-                       visiblePriority="xs" />
+        <LabelColumn name="status"
+                     title="Status"
+                     field="status"
+                     :filter="pickExistingValueFilter"
+                     :classSource="{ Active: 'success', Inactive: 'default' }"
+                     visiblePriority="xs" />
 
         <AttributeColumns :attributes="config.gridDefinition?.attributeFields ?? []" />
     </Grid>
@@ -33,7 +35,7 @@
 
 <script setup lang="ts">
 import { onConfigurationValuesChanged, useConfigurationValues, useInvokeBlockAction, useReloadBlock } from "@Obsidian/Utility/block";
-import Grid, { AttributeColumns, BooleanColumn, NumberColumn, numberValueFilter, SelectColumn } from "@Obsidian/Controls/grid";
+import Grid, { AttributeColumns, HtmlColumn, LabelColumn, pickExistingValueFilter, SelectColumn, TextColumn, textValueFilter } from "@Obsidian/Controls/grid";
 import { alert } from "@Obsidian/Utility/dialogs";
 import { ListBlockBox } from "@Obsidian/ViewModels/Blocks/listBlockBox";
 import { PtoBracketListOptionsBag } from "./viewModels";

@@ -113,7 +113,8 @@ namespace com.bemaservices.HrManagement.Blocks
         /// <inheritdoc/>
         protected override IQueryable<PtoBracket> GetListQueryable( RockContext rockContext )
         {
-            return base.GetListQueryable( rockContext );
+            return base.GetListQueryable( rockContext )
+                .Include( a => a.PtoBracketTypes.Select( b => b.PtoType ) );
         }
 
         /// <inheritdoc/>
@@ -122,9 +123,12 @@ namespace com.bemaservices.HrManagement.Blocks
             return new GridBuilder<PtoBracket>()
                 .WithBlock( this )
                 .AddTextField( "idKey", a => a.IdKey )
-                .AddField( "isActive", a => a.IsActive )
-                .AddField( "maximumYear", a => a.MaximumYear )
-                .AddField( "minimumYear", a => a.MinimumYear )
+                .AddTextField( "name", a => a.Name )
+                .AddTextField( "summary", a => a.PtoBracketTypes
+                    .Select( b => $"{b.PtoType.Name}: {b.DefaultHours} hrs" )
+                    .ToList()
+                    .AsDelimited( "<br/>" ) )
+                .AddTextField( "status", a => a.IsActive ? "Active" : "Inactive" )
                 .AddAttributeFields( GetGridAttributes() );
         }
 

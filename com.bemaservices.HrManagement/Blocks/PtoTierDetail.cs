@@ -162,7 +162,7 @@ namespace com.bemaservices.HrManagement.Blocks
             {
                 IdKey = entity.IdKey,
                 Color = entity.Color,
-                DaysOfWeek = entity.DaysOfWeek,
+                DaysOfWeek = entity.DaysOfWeek.SplitDelimitedValues(),
                 Description = entity.Description,
                 IsActive = entity.IsActive,
                 Name = entity.Name
@@ -221,7 +221,7 @@ namespace com.bemaservices.HrManagement.Blocks
                 () => entity.Color = box.Bag.Color );
 
             box.IfValidProperty( nameof( box.Bag.DaysOfWeek ),
-                () => entity.DaysOfWeek = box.Bag.DaysOfWeek );
+                () => entity.DaysOfWeek = box.Bag.DaysOfWeek.JoinStrings(",") );
 
             box.IfValidProperty( nameof( box.Bag.Description ),
                 () => entity.Description = box.Bag.Description );

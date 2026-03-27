@@ -37,6 +37,7 @@ using Rock.Web.UI.Controls;
 using Attribute = Rock.Model.Attribute;
 
 using com.bemaservices.HrManagement.Model;
+using com.bemaservices.HrManagement.Enums;
 using CSScriptLibrary;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 

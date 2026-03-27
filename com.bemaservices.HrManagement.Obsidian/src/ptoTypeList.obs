@@ -1,8 +1,17 @@
 <template>
+    <div v-if="calendarFeedUrl" class="d-flex justify-content-end mb-2">
+        <button type="button"
+                class="btn btn-info btn-sm"
+                title="Copy Feed URL to Clipboard"
+                @click="onCopyCalendarFeedUrl">
+            <i class="fa fa-calendar-alt"></i> Export PTO Calendar Feed
+        </button>
+    </div>
+
     <Grid :definition="config.gridDefinition ?? undefined"
           :data="gridDataSource"
           keyField="idKey"
-          itemTerm="Pto Type"
+          itemTerm="PTO Type"
           entityTypeGuid="b1f9d79a-0b0d-49e2-ae3d-d1492425fd38"
           stickyHeader
           liveUpdates
@@ -10,9 +19,9 @@
           @selectItem="onSelectItem">
         <SelectColumn />
 
-        <TextColumn name="color"
-                    title="Color"
-                    field="color"
+        <TextColumn name="name"
+                    title="Name"
+                    field="name"
                     :filter="textValueFilter"
                     visiblePriority="xs" />
 
@@ -22,22 +31,16 @@
                     :filter="textValueFilter"
                     visiblePriority="xs" />
 
+        <TextColumn name="color"
+                    title="Color"
+                    field="color"
+                    :filter="textValueFilter"
+                    visiblePriority="xs" />
+
         <BooleanColumn name="isActive"
                        title="Is Active"
                        field="isActive"
                        visiblePriority="xs" />
-
-        <TextColumn name="name"
-                    title="Name"
-                    field="name"
-                    :filter="textValueFilter"
-                    visiblePriority="xs" />
-
-        <TextColumn name="workflowType"
-                    title="Workflow Type"
-                    field="workflowType"
-                    :filter="textValueFilter"
-                    visiblePriority="xs" />
 
         <AttributeColumns :attributes="config.gridDefinition?.attributeFields ?? []" />
 
@@ -45,19 +48,81 @@
 
         <DeleteColumn v-if="config.isDeleteEnabled" @click="onDeleteClick" />
     </Grid>
+
+    <Modal v-model="isModalOpen"
+           title="PTO Type"
+           :subtitle="`Id: ${id}`"
+           saveText="Save"
+           @save="onSavePtoType">
+        <legend>
+            {{ modalTitle }}
+        </legend>
+
+        <fieldset>
+            <div class="row">
+                <div class="col-md-6">
+                    <TextBox v-model="name"
+                             label="Name"
+                             rules="required" />
+                </div>
+                <div class="col-md-6">
+                    <CheckBox v-model="isActive"
+                              label="Is Active" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <TextBox v-model="description"
+                             label="Description"
+                             textMode="multiline" />
+                </div>
+                <div class="col-md-6">
+                    <ColorPicker v-model="color"
+                             label="Color" />
+                </div>
+            </div>
+            <AttributeValuesContainer v-model="attributeValues"
+                                      :attributes="attributes"
+                                      :showCategoryLabel="false"
+                                      :isEditMode="true" />
+        </fieldset>
+    </Modal>
 </template>
 
 <script setup lang="ts">
 import { onConfigurationValuesChanged, useConfigurationValues, useInvokeBlockAction, useReloadBlock } from "@Obsidian/Utility/block";
 import Grid, { AttributeColumns, BooleanColumn, TextColumn, textValueFilter, DeleteColumn, SecurityColumn, SelectColumn } from "@Obsidian/Controls/grid";
 import { alert } from "@Obsidian/Utility/dialogs";
+import Modal from "@Obsidian/Controls/modal.obs";
+import TextBox from "@Obsidian/Controls/textBox.obs";
+import CheckBox from "@Obsidian/Controls/checkBox.obs";
+import ColorPicker from "@Obsidian/Controls/colorPicker.obs";
+import AttributeValuesContainer from "@Obsidian/Controls/attributeValuesContainer.obs";
 import { ListBlockBox } from "@Obsidian/ViewModels/Blocks/listBlockBox";
 import { PtoTypeListOptionsBag } from "./viewModels";
 import { GridDataBag } from "@Obsidian/ViewModels/Core/Grid/gridDataBag";
-import { NavigationUrlKey } from "./PtoTypeList/types.partial";
-import { reactive, ref } from "vue";
+import { ListItemBag } from "@Obsidian/ViewModels/Utility/listItemBag";
+import { PublicAttributeBag } from "@Obsidian/ViewModels/Utility/publicAttributeBag";
+import { computed, reactive, ref, watch } from "vue";
 
-const config = useConfigurationValues<ListBlockBox<PtoTypeListOptionsBag>>();
+type PtoTypeBag = {
+    attributes?: Record<string, PublicAttributeBag> | null;
+    attributeValues?: Record<string, string> | null;
+    color?: string | null;
+    description?: string | null;
+    id: number;
+    idKey?: string | null;
+    isActive: boolean;
+    isNegativeTimeBalanceAllowed: boolean;
+    name?: string | null;
+    workflowType?: ListItemBag | null;
+};
+
+type PtoTypeListOptions = PtoTypeListOptionsBag & {
+    ptoCalendarFeedUrl?: string | null;
+};
+
+const config = useConfigurationValues<ListBlockBox<PtoTypeListOptions>>();
 const invokeBlockAction = useInvokeBlockAction();
 
 // All blocks auto reload when changing block settings unless there is an
@@ -69,6 +134,28 @@ onConfigurationValuesChanged(useReloadBlock());
 
 const gridDataSource = ref<Promise<GridDataBag>>();
 let gridData: GridDataBag | undefined;
+const isModalOpen = ref(false);
+const idKey = ref("");
+const id = ref(0);
+const name = ref("");
+const description = ref("");
+const isActive = ref(true);
+const isNegativeTimeBalanceAllowed = ref(false);
+const color = ref("");
+const workflowType = ref<ListItemBag | null>(null);
+const attributes = ref<Record<string, PublicAttributeBag>>({});
+const attributeValues = ref<Record<string, string>>({});
+
+// #endregion
+
+// #region Computed Values
+
+const modalTitle = computed((): string => {
+    const operation = idKey.value ? "Edit" : "Add";
+    return `${operation} PTO Type`;
+});
+
+const calendarFeedUrl = computed((): string => config.options?.ptoCalendarFeedUrl ?? "");
 
 // #endregion
 
@@ -98,9 +185,27 @@ async function loadGridData(): Promise<GridDataBag> {
  *
  * @param key The key of the row that was selected.
  */
-function onSelectItem(key: string): void {
-    if (config.navigationUrls?.[NavigationUrlKey.DetailPage]) {
-        window.location.href = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", key);
+async function onSelectItem(key: string): Promise<void> {
+    const result = await invokeBlockAction<PtoTypeBag>("Edit", {
+        key
+    });
+
+    if (result.isSuccess && result.data) {
+        idKey.value = result.data.idKey ?? "";
+        id.value = result.data.id ?? 0;
+        name.value = result.data.name ?? "";
+        description.value = result.data.description ?? "";
+        isActive.value = result.data.isActive;
+        isNegativeTimeBalanceAllowed.value = result.data.isNegativeTimeBalanceAllowed;
+        color.value = result.data.color ?? "";
+        workflowType.value = result.data.workflowType ?? null;
+        attributes.value = result.data.attributes ?? {};
+        attributeValues.value = result.data.attributeValues ?? {};
+
+        isModalOpen.value = true;
+    }
+    else {
+        await alert(result.errorMessage ?? "Unknown error while trying to edit pto type.");
     }
 }
 
@@ -130,13 +235,80 @@ async function onDeleteClick(key: string): Promise<void> {
 /**
  * Called when the Add button has been clicked by the individual.
  */
-function onAddItem(): void {
-    if (config.navigationUrls?.[NavigationUrlKey.DetailPage]) {
-        window.location.href = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", "0");
+async function onAddItem(): Promise<void> {
+    await onSelectItem("");
+}
+
+/**
+ * Copies the PTO calendar feed URL to the clipboard.
+ */
+async function onCopyCalendarFeedUrl(): Promise<void> {
+    if (!calendarFeedUrl.value) {
+        return;
+    }
+
+    try {
+        await window.navigator.clipboard.writeText(calendarFeedUrl.value);
+        await alert("PTO calendar feed URL copied to clipboard.");
+    }
+    catch {
+        await alert(`Copy this PTO calendar feed URL:\n${calendarFeedUrl.value}`);
     }
 }
 
+/**
+ * Sends a request to the server to save the PTO Type.
+ */
+async function onSavePtoType(): Promise<void> {
+    const bag: PtoTypeBag = {
+        id: id.value,
+        idKey: idKey.value,
+        name: name.value,
+        description: description.value,
+        isActive: isActive.value,
+        isNegativeTimeBalanceAllowed: isNegativeTimeBalanceAllowed.value,
+        color: color.value,
+        workflowType: workflowType.value,
+        attributes: attributes.value,
+        attributeValues: attributeValues.value
+    };
+
+    const result = await invokeBlockAction<string>("Save", {
+        bag
+    });
+
+    if (result.isSuccess) {
+        gridDataSource.value = loadGridData();
+        isModalOpen.value = false;
+    }
+    else {
+        await alert(result.errorMessage ?? "Unknown error while trying to save pto type.");
+    }
+}
+
+/**
+ * Resets the modal values.
+ */
+function resetModal(): void {
+    idKey.value = "";
+    id.value = 0;
+    name.value = "";
+    description.value = "";
+    isActive.value = true;
+    isNegativeTimeBalanceAllowed.value = false;
+    color.value = "";
+    workflowType.value = null;
+    attributes.value = {};
+    attributeValues.value = {};
+}
+
 // #endregion
+
+watch(isModalOpen, value => {
+    if (!value) {
+        resetModal();
+    }
+});
 
 gridDataSource.value = loadGridData();
 </script>

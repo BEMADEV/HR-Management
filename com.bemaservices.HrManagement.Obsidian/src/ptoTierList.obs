@@ -2,7 +2,7 @@
     <Grid :definition="config.gridDefinition ?? undefined"
           :data="gridDataSource"
           keyField="idKey"
-          itemTerm="Pto Tier"
+          itemTerm="PTO Tier"
           entityTypeGuid="9c7f0a71-23b9-4f8d-a104-7bb521f3eb0e"
           stickyHeader
           liveUpdates
