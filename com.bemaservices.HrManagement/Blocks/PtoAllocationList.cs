@@ -126,7 +126,7 @@ namespace com.bemaservices.HrManagement.Blocks
                 .AddTextField( "idKey", a => a.IdKey )
                 .AddDateTimeField( "endDate", a => a.EndDate )
                 .AddField( "hours", a => a.Hours )
-                .AddPersonField( "", a => a.PersonAlias?.Person )
+                .AddPersonField( "person", a => a.PersonAlias?.Person )
                 .AddField( "ptoAllocationSourceType", a => a.PtoAllocationSourceType )
                 .AddField( "ptoAllocationStatus", a => a.PtoAllocationStatus )
                 .AddTextField( "ptoType", a => a.PtoType?.Name )

@@ -49,7 +49,22 @@ namespace com.bemaservices.HrManagement.Blocks
             public const string DetailPage = "DetailPage";
         }
 
+        private static class PageParameterKey
+        {
+            public const string PtoTierId = "PtoTierId";
+            public const string PtoBracketId = "PtoBracketId";
+        }
+
         #endregion Keys
+
+        #region Fields
+
+        /// <summary>
+        /// The cached PTO Tier, should be accessed via the <see cref="GetPtoTier"/> method.
+        /// </summary>
+        private PtoTier _ptoTier = null;
+
+        #endregion
 
         #region Properties
 
@@ -83,7 +98,7 @@ namespace com.bemaservices.HrManagement.Blocks
         private PtoBracketListOptionsBag GetBoxOptions()
         {
             var options = new PtoBracketListOptionsBag();
-
+            options.IsBlockVisible = GetPtoTier() != null;
             return options;
         }
 
@@ -104,17 +119,38 @@ namespace com.bemaservices.HrManagement.Blocks
         /// <returns>A dictionary of key names and URL values.</returns>
         private Dictionary<string, string> GetBoxNavigationUrls()
         {
+            var ptoTier = GetPtoTier();
+
+            var qryParams = new Dictionary<string, string>
+            {
+                { PageParameterKey.PtoTierId, ptoTier?.IdKey },
+                { PageParameterKey.PtoBracketId, "((Key))" },
+            };
+
             return new Dictionary<string, string>
             {
-                [NavigationUrlKey.DetailPage] = this.GetLinkedPageUrl( AttributeKey.DetailPage, "PtoBracketId", "((Key))" )
+                [NavigationUrlKey.DetailPage] = this.GetLinkedPageUrl( AttributeKey.DetailPage, qryParams )
             };
         }
 
         /// <inheritdoc/>
         protected override IQueryable<PtoBracket> GetListQueryable( RockContext rockContext )
         {
-            return base.GetListQueryable( rockContext )
-                .Include( a => a.PtoBracketTypes.Select( b => b.PtoType ) );
+            var ptoTier = GetPtoTier();
+
+            if(ptoTier != null )
+            {
+                var qry = new PtoBracketService( rockContext )
+                    .Queryable()
+                    .AsNoTracking()
+                    .Where( b => b.PtoTierId == ptoTier.Id );
+
+                return qry;
+            }
+            else
+            {
+                return new List<PtoBracket>().AsQueryable();
+            }
         }
 
         /// <inheritdoc/>
@@ -130,6 +166,23 @@ namespace com.bemaservices.HrManagement.Blocks
                     .AsDelimited( "<br/>" ) )
                 .AddTextField( "status", a => a.IsActive ? "Active" : "Inactive" )
                 .AddAttributeFields( GetGridAttributes() );
+        }
+
+        private PtoTier GetPtoTier()
+        {
+            if ( _ptoTier != null )
+            {
+                return _ptoTier;
+            }
+
+            var ptoTierId = PageParameter( PageParameterKey.PtoTierId );
+
+            if ( ptoTierId.IsNotNullOrWhiteSpace() )
+            {
+                _ptoTier = new PtoTierService( RockContext ).Get( ptoTierId, !PageCache.Layout.Site.DisablePredictableIds );
+            }
+
+            return _ptoTier;
         }
 
         #endregion

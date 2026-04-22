@@ -1,5 +1,6 @@
 <template>
-    <Grid :definition="config.gridDefinition ?? undefined"
+    <Grid v-if="config.options?.isBlockVisible"
+          :definition="config.gridDefinition ?? undefined"
           :data="gridDataSource"
           keyField="idKey"
           itemTerm="Pto Bracket"

@@ -42,6 +42,7 @@ namespace com.bemaservices.HrManagement.Blocks
         private static class PageParameterKey
         {
             public const string PtoBracketId = "PtoBracketId";
+            public const string PtoTierId = "PtoTierId";
         }
 
         private static class NavigationUrlKey
@@ -323,9 +324,18 @@ namespace com.bemaservices.HrManagement.Blocks
         /// <returns>A dictionary of key names and URL values.</returns>
         private Dictionary<string, string> GetBoxNavigationUrls()
         {
+            var ptoTierId = PageParameter( PageParameterKey.PtoTierId );
+
+            var qryParams = new Dictionary<string, string>();
+
+            if ( ptoTierId.IsNotNullOrWhiteSpace() )
+            {
+                qryParams.Add( PageParameterKey.PtoTierId, ptoTierId );
+            }
+
             return new Dictionary<string, string>
             {
-                [NavigationUrlKey.ParentPage] = this.GetParentPageUrl()
+                [NavigationUrlKey.ParentPage] = this.GetParentPageUrl( qryParams )
             };
         }
 

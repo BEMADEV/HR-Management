@@ -6,22 +6,16 @@
     <DetailBlock v-if="!blockError"
                  v-model:mode="panelMode"
                  :name="panelName"
-                 :labels="blockLabels"
                  :entityKey="entityKey"
                  :isAuditHidden="false"
                  :isBadgesVisible="true"
                  :isDeleteVisible="isEditable"
-                 :isEditVisible="isEditable"
+                 :isEditVisible="false"
                  :isFollowVisible="true"
                  :isSecurityHidden="false"
                  @cancelEdit="onCancelEdit"
                  @delete="onDelete"
-                 @edit="onEdit"
                  @save="onSave">
-        <template #view>
-            <ViewPanel :modelValue="ptoBracketViewBag" :options="options" />
-        </template>
-
         <template #edit>
             <EditPanel v-model="ptoBracketEditBag" :options="options" @propertyChanged="baseBlock.onPropertyChanged" />
         </template>
@@ -33,9 +27,7 @@ import { computed, ref } from "vue";
 import NotificationBox from "@Obsidian/Controls/notificationBox.obs";
 import DetailBlock from "@Obsidian/Templates/detailBlock";
 import { DetailPanelMode } from "@Obsidian/Enums/Controls/detailPanelMode";
-import { PanelAction } from "@Obsidian/Types/Controls/panelAction";
 import EditPanel from "./PtoBracketDetail/editPanel.partial.obs";
-import ViewPanel from "./PtoBracketDetail/viewPanel.partial.obs";
 import { onConfigurationValuesChanged, useConfigurationValues, useEntityDetailBlock, useInvokeBlockAction, useReloadBlock } from "@Obsidian/Utility/block";
 import { NavigationUrlKey } from "./PtoBracketDetail/types.partial";
 import { DetailBlockBox } from "@Obsidian/ViewModels/Blocks/detailBlockBox";
@@ -55,12 +47,11 @@ onConfigurationValuesChanged(useReloadBlock());
 const blockError = ref("");
 const errorMessage = ref("");
 
-const ptoBracketViewBag = ref(config.entity);
 const ptoBracketEditBag = ref<ValidPropertiesBox<PtoBracketBag>>({
     bag: {} as PtoBracketBag
 });
 
-const panelMode = ref<DetailPanelMode>(DetailPanelMode.View);
+const panelMode = ref<DetailPanelMode>(DetailPanelMode.Edit);
 
 const baseBlock = useEntityDetailBlock({
     blockConfig: config,
@@ -75,12 +66,12 @@ const baseBlock = useEntityDetailBlock({
  * The entity name to display in the block panel.
  */
 const panelName = computed((): string => {
-    if (!ptoBracketViewBag.value?.idKey) {
+    if (!ptoBracketEditBag.value.bag?.idKey) {
         return "Add PTO Bracket";
     }
 
-    const minimumYear = ptoBracketViewBag.value?.minimumYear;
-    const maximumYear = ptoBracketViewBag.value?.maximumYear;
+    const minimumYear = ptoBracketEditBag.value.bag?.minimumYear;
+    const maximumYear = ptoBracketEditBag.value.bag?.maximumYear;
 
     if (minimumYear == null) {
         return "PTO Bracket";
@@ -97,35 +88,7 @@ const panelName = computed((): string => {
  * The identifier key value for this entity.
  */
 const entityKey = computed((): string => {
-    return ptoBracketViewBag.value?.idKey ?? "";
-});
-
-/**
- * Additional labels to display in the block panel.
- */
-const blockLabels = computed((): PanelAction[] | undefined => {
-    const labels: PanelAction[] = [];
-
-    if (panelMode.value !== DetailPanelMode.View) {
-        return undefined;
-    }
-
-    if (ptoBracketViewBag.value?.isActive === true) {
-        labels.push({
-            iconCssClass: "fa fa-lightbulb",
-            title: "Active",
-            type: "success"
-        });
-    }
-    else {
-        labels.push({
-            iconCssClass: "far fa-lightbulb",
-            title: "Inactive",
-            type: "danger"
-        });
-    }
-
-    return labels;
+    return ptoBracketEditBag.value.bag?.idKey ?? "";
 });
 
 const isEditable = computed((): boolean => {
@@ -151,15 +114,11 @@ const options = computed((): PtoBracketDetailOptionsBag => {
  * @returns true if the panel should leave edit mode; false if it should stay in edit mode; or a string containing a redirect URL.
  */
 async function onCancelEdit(): Promise<boolean | string> {
-    if (!ptoBracketEditBag.value.bag?.idKey) {
-        if (config.navigationUrls?.[NavigationUrlKey.ParentPage]) {
-            return config.navigationUrls[NavigationUrlKey.ParentPage];
-        }
-
-        return false;
+    if (config.navigationUrls?.[NavigationUrlKey.ParentPage]) {
+        return config.navigationUrls[NavigationUrlKey.ParentPage];
     }
 
-    return true;
+    return false;
 }
 
 /**
@@ -172,7 +131,7 @@ async function onDelete(): Promise<false | string> {
     errorMessage.value = "";
 
     const result = await invokeBlockAction<string>("Delete", {
-        key: ptoBracketViewBag.value?.idKey
+        key: ptoBracketEditBag.value.bag?.idKey
     });
 
     if (result.isSuccess && result.data) {
@@ -181,30 +140,6 @@ async function onDelete(): Promise<false | string> {
     else {
         errorMessage.value = result.errorMessage ?? "Unknown error while trying to delete pto bracket.";
 
-        return false;
-    }
-}
-
-/**
- * Event handler for the Edit button being clicked. Request the edit
- * details from the server and then enter edit mode.
- *
- * @returns true if the panel should enter edit mode; otherwise false.
- */
-async function onEdit(): Promise<boolean> {
-    const result = await invokeBlockAction<ValidPropertiesBox<PtoBracketBag>>("Edit", {
-        key: ptoBracketViewBag.value?.idKey
-    });
-
-    if (result.isSuccess && result.data && result.data.bag) {
-        ptoBracketEditBag.value = {
-            bag: result.data.bag,
-            validProperties: result.data.validProperties ?? Object.keys(result.data.bag)
-        };
-
-        return true;
-    }
-    else {
         return false;
     }
 }
@@ -222,15 +157,12 @@ async function onSave(): Promise<boolean | string> {
         box: ptoBracketEditBag.value
     });
 
-    if (result.isSuccess && result.data) {
-        if (result.statusCode === 200 && typeof result.data === "object") {
-            ptoBracketViewBag.value = result.data.bag;
+    if (result.isSuccess) {
+        if (config.navigationUrls?.[NavigationUrlKey.ParentPage]) {
+            return config.navigationUrls[NavigationUrlKey.ParentPage];
+        }
 
-            return true;
-        }
-        else if (result.statusCode === 201 && typeof result.data === "string") {
-            return result.data;
-        }
+        return true;
     }
 
     errorMessage.value = result.errorMessage ?? "Unknown error while trying to save pto bracket.";
@@ -240,15 +172,43 @@ async function onSave(): Promise<boolean | string> {
 
 // #endregion
 
-// Handle any initial error conditions or the need to go into edit mode.
-if (config.errorMessage) {
-    blockError.value = config.errorMessage;
+async function initializeEditState(): Promise<void> {
+    // Handle any initial error conditions and always prepare edit mode.
+    if (config.errorMessage) {
+        blockError.value = config.errorMessage;
+        return;
+    }
+
+    if (!config.entity) {
+        blockError.value = "The specified pto bracket could not be viewed.";
+        return;
+    }
+
+    if (!config.entity.idKey) {
+        ptoBracketEditBag.value = {
+            bag: config.entity,
+            validProperties: Object.keys(config.entity)
+        };
+        panelMode.value = DetailPanelMode.Add;
+        return;
+    }
+
+    panelMode.value = DetailPanelMode.Edit;
+
+    const result = await invokeBlockAction<ValidPropertiesBox<PtoBracketBag>>("Edit", {
+        key: config.entity.idKey
+    });
+
+    if (result.isSuccess && result.data?.bag) {
+        ptoBracketEditBag.value = {
+            bag: result.data.bag,
+            validProperties: result.data.validProperties ?? Object.keys(result.data.bag ?? {})
+        };
+    }
+    else {
+        blockError.value = result.errorMessage ?? "Unable to load PTO bracket for editing.";
+    }
 }
-else if (!config.entity) {
-    blockError.value = "The specified pto bracket could not be viewed.";
-}
-else if (!config.entity.idKey) {
-    ptoBracketEditBag.value = { bag: config.entity };
-    panelMode.value = DetailPanelMode.Add;
-}
+
+void initializeEditState();
 </script>

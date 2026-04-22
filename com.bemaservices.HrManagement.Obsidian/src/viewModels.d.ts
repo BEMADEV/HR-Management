@@ -52,6 +52,9 @@ export type PtoBracketDetailOptionsBag = {
 };
 
 export type PtoBracketListOptionsBag = {
+
+    /** Gets or sets a value indicating whether the block should be displayed to the user. */
+    isBlockVisible: boolean;
 };
 
 export type PtoRequestListOptionsBag = {
