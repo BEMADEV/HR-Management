@@ -59,6 +59,9 @@ export type PtoBracketListOptionsBag = {
 };
 
 export type PtoRequestListOptionsBag = {
+    hasPersonContext: boolean;
+
+    contextPersonIdKey?: string | null;
 };
 
 export type PtoTierBag = {

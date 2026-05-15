@@ -1,38 +1,36 @@
 <template>
-    <Grid :definition="config.gridDefinition ?? undefined"
-          :data="gridDataSource"
+    <Grid :data="gridDataSource"
           keyField="idKey"
-          itemTerm="Pto Request"
+          itemTerm="PTO Request"
           entityTypeGuid="f38b7ba2-1289-4cfe-afd4-74df942280d8"
           stickyHeader
           liveUpdates
           :onAddItem="config.isAddEnabled ? onAddItem : undefined"
           @selectItem="onSelectItem">
-        <SelectColumn />
 
-        <NumberColumn name="hours"
-                       title="Hours"
-                       field="hours"
-                       :filter="numberValueFilter"
-                       visiblePriority="xs" />
-
-        <TextColumn name="ptoAllocation"
-                    title="Pto Allocation"
-                    field="ptoAllocation"
+        <TextColumn name="person"
+                    title="Person"
+                    field="person"
                     :filter="textValueFilter"
                     visiblePriority="xs" />
 
-        <LabelColumn name="ptoRequestApprovalState"
-                     title="Pto Request Approval State"
-                     field="ptoRequestApprovalState"
-                     :filter="pickExistingValueFilter"
-                     visiblePriority="xs" />
+        <TextColumn name="ptoType"
+                    title="PTO Type"
+                    field="ptoType"
+                    :filter="textValueFilter"
+                    visiblePriority="xs" />
 
         <TextColumn name="reason"
                     title="Reason"
                     field="reason"
                     :filter="textValueFilter"
-                    visiblePriority="xs" />
+                    visiblePriority="md" />
+
+        <NumberColumn name="hours"
+                       title="Total Hours"
+                       field="hours"
+                       :filter="numberValueFilter"
+                       visiblePriority="xs" />
 
         <DateColumn name="requestDate"
                     title="Request Date"
@@ -40,14 +38,21 @@
                     :filter="dateValueFilter"
                     visiblePriority="xs" />
 
-        <AttributeColumns :attributes="config.gridDefinition?.attributeFields ?? []" />
+        <LabelColumn name="ptoRequestApprovalState"
+                     title="Status"
+                     field="ptoRequestApprovalState"
+                     :filter="pickExistingValueFilter"
+                     :classSource="{ Approved: 'success', Pending: 'warning', Denied: 'danger', Cancelled: 'default' }"
+                     visiblePriority="xs" />
+
+        <DeleteColumn v-if="config.isDeleteEnabled" @click="onDeleteClick" />
     </Grid>
 </template>
 
 <script setup lang="ts">
 import { onConfigurationValuesChanged, useConfigurationValues, useInvokeBlockAction, useReloadBlock } from "@Obsidian/Utility/block";
-import Grid, { AttributeColumns, DateColumn, dateValueFilter, LabelColumn, NumberColumn, numberValueFilter, pickExistingValueFilter, TextColumn, textValueFilter, SelectColumn } from "@Obsidian/Controls/grid";
-import { alert } from "@Obsidian/Utility/dialogs";
+import Grid, { DateColumn, dateValueFilter, LabelColumn, NumberColumn, numberValueFilter, pickExistingValueFilter, TextColumn, textValueFilter, DeleteColumn } from "@Obsidian/Controls/grid";
+import { confirm } from "@Obsidian/Utility/dialogs";
 import { ListBlockBox } from "@Obsidian/ViewModels/Blocks/listBlockBox";
 import { PtoRequestListOptionsBag } from "./viewModels";
 import { GridDataBag } from "@Obsidian/ViewModels/Core/Grid/gridDataBag";
@@ -57,9 +62,7 @@ import { reactive, ref } from "vue";
 const config = useConfigurationValues<ListBlockBox<PtoRequestListOptionsBag>>();
 const invokeBlockAction = useInvokeBlockAction();
 
-// All blocks auto reload when changing block settings unless there is an
-// explicit reason not to (like using a custom reload function instead),
-// in which case you can remove this code.
+// All blocks auto reload when changing block settings
 onConfigurationValuesChanged(useReloadBlock());
 
 // #region Values
@@ -96,8 +99,12 @@ async function loadGridData(): Promise<GridDataBag> {
  * @param key The key of the row that was selected.
  */
 function onSelectItem(key: string): void {
-    if (config.navigationUrls?.[NavigationUrlKey.DetailPage]) {
-        window.location.href = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", key);
+    if (config.navigationUrls?.[NavigationUrlKey.WorkflowEntryPage] && gridData?.rows) {
+        const row = gridData.rows.find(r => r["idKey"] === key);
+        if (row) {
+            const guid = row["guid"];
+            window.location.href = `${config.navigationUrls[NavigationUrlKey.WorkflowEntryPage]}?PTORequest=${guid}`;
+        }
     }
 }
 
@@ -105,12 +112,36 @@ function onSelectItem(key: string): void {
  * Called when the Add button has been clicked by the individual.
  */
 function onAddItem(): void {
-    if (config.navigationUrls?.[NavigationUrlKey.DetailPage]) {
-        window.location.href = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", "0");
+    if (config.navigationUrls?.[NavigationUrlKey.WorkflowEntryPage]) {
+        let url = config.navigationUrls[NavigationUrlKey.WorkflowEntryPage];
+        if (config.options?.contextPersonIdKey) {
+            // If we have a person context, pass the person's alias guid
+            url += `?Person=${config.options.contextPersonIdKey}`;
+        }
+        window.location.href = url;
+    }
+}
+
+/**
+ * Called when the delete button is clicked for a row.
+ */
+async function onDeleteClick(key: string): Promise<void> {
+    const confirmed = await confirm("Are you sure you want to cancel this PTO request?");
+    if (!confirmed) {
+        return;
+    }
+
+    if (config.navigationUrls?.[NavigationUrlKey.WorkflowEntryPage] && gridData?.rows) {
+        const row = gridData.rows.find(r => r["idKey"] === key);
+        if (row) {
+            const guid = row["guid"];
+            window.location.href = `${config.navigationUrls[NavigationUrlKey.WorkflowEntryPage]}?PTORequest=${guid}&CancelRequest=Yes`;
+        }
     }
 }
 
 // #endregion
 
+// Load initial data
 gridDataSource.value = loadGridData();
 </script>

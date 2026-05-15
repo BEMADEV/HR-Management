@@ -65,3 +65,25 @@ export const PtoAllocationStatusDescription: Record<number, string> = {
 };
 
 export type PtoAllocationStatus = typeof PtoAllocationStatus[keyof typeof PtoAllocationStatus];
+
+export const PtoRequestApprovalState = {
+    Pending: 0,
+
+    Approved: 1,
+
+    Denied: 2,
+
+    Cancelled: 3
+} as const;
+
+export const PtoRequestApprovalStateDescription: Record<number, string> = {
+    0: "Pending",
+
+    1: "Approved",
+
+    2: "Denied",
+
+    3: "Cancelled"
+};
+
+export type PtoRequestApprovalState = typeof PtoRequestApprovalState[keyof typeof PtoRequestApprovalState];

@@ -1,3 +1,3 @@
 export const enum NavigationUrlKey {
-    DetailPage = "DetailPage"
+    WorkflowEntryPage = "WorkflowEntryPage"
 }
