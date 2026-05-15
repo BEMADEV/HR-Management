@@ -1,0 +1,106 @@
+<template>
+    <Grid v-if="config.options?.isBlockVisible"
+          :definition="config.gridDefinition ?? undefined"
+          :data="gridDataSource"
+          keyField="idKey"
+          itemTerm="Pto Bracket"
+          entityTypeGuid="079275bf-4e79-4038-91e9-389a172dca71"
+          stickyHeader
+          liveUpdates
+          :onAddItem="config.isAddEnabled ? onAddItem : undefined"
+          @selectItem="onSelectItem">
+        <SelectColumn />
+
+        <TextColumn name="name"
+                    title="Name"
+                    field="name"
+                    :filter="textValueFilter"
+                    visiblePriority="xs" />
+
+        <HtmlColumn name="summary"
+                    title="Summary"
+                    field="summary"
+                    visiblePriority="xs"
+                    wrapped />
+
+        <LabelColumn name="status"
+                     title="Status"
+                     field="status"
+                     :filter="pickExistingValueFilter"
+                     :classSource="{ Active: 'success', Inactive: 'default' }"
+                     visiblePriority="xs" />
+
+        <AttributeColumns :attributes="config.gridDefinition?.attributeFields ?? []" />
+    </Grid>
+</template>
+
+<script setup lang="ts">
+import { onConfigurationValuesChanged, useConfigurationValues, useInvokeBlockAction, useReloadBlock } from "@Obsidian/Utility/block";
+import Grid, { AttributeColumns, HtmlColumn, LabelColumn, pickExistingValueFilter, SelectColumn, TextColumn, textValueFilter } from "@Obsidian/Controls/grid";
+import { alert } from "@Obsidian/Utility/dialogs";
+import { ListBlockBox } from "@Obsidian/ViewModels/Blocks/listBlockBox";
+import { PtoBracketListOptionsBag } from "./viewModels";
+import { GridDataBag } from "@Obsidian/ViewModels/Core/Grid/gridDataBag";
+import { NavigationUrlKey } from "./PtoBracketList/types.partial";
+import { reactive, ref } from "vue";
+
+const config = useConfigurationValues<ListBlockBox<PtoBracketListOptionsBag>>();
+const invokeBlockAction = useInvokeBlockAction();
+
+// All blocks auto reload when changing block settings unless there is an
+// explicit reason not to (like using a custom reload function instead),
+// in which case you can remove this code.
+onConfigurationValuesChanged(useReloadBlock());
+
+// #region Values
+
+const gridDataSource = ref<Promise<GridDataBag>>();
+let gridData: GridDataBag | undefined;
+
+// #endregion
+
+// #region Functions
+
+/**
+ * Called when the grid is requesting the row data be loaded.
+ */
+async function loadGridData(): Promise<GridDataBag> {
+    const result = await invokeBlockAction<GridDataBag>("GetGridData");
+
+    if (result.isSuccess && result.data) {
+        gridData = reactive(result.data);
+        return gridData;
+    }
+    else {
+        throw new Error(result.errorMessage ?? "Unknown error while trying to load grid data.");
+    }
+}
+
+// #endregion
+
+// #region Event Handlers
+
+/**
+ * Called when a row has been selected by the individual.
+ *
+ * @param key The key of the row that was selected.
+ */
+function onSelectItem(key: string): void {
+    if (config.navigationUrls?.[NavigationUrlKey.DetailPage]) {
+        window.location.href = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", key);
+    }
+}
+
+/**
+ * Called when the Add button has been clicked by the individual.
+ */
+function onAddItem(): void {
+    if (config.navigationUrls?.[NavigationUrlKey.DetailPage]) {
+        window.location.href = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", "0");
+    }
+}
+
+// #endregion
+
+gridDataSource.value = loadGridData();
+</script>

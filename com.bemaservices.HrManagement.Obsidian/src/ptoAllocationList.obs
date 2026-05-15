@@ -1,0 +1,223 @@
+<template>
+    <NotificationBox v-if="resultMessage" :alertType="resultAlertType" v-html="resultMessage" @close="resultMessage = ''" dismissible />
+
+    <Grid :definition="config.gridDefinition ?? undefined"
+          :data="gridDataSource"
+          keyField="idKey"
+          itemTerm="Pto Allocation"
+          entityTypeGuid="198a76a9-9ea0-4030-b8b2-526ade69c268"
+          stickyHeader
+          liveUpdates
+          :onAddItem="config.isAddEnabled ? onAddItem : undefined"
+          @selectItem="onSelectItem">
+
+        <template #gridActions>
+            <DropDownList v-model="selectedAction"
+                         :items="actionItems"
+                         :showBlankItem="true"
+                         blankValue=""
+                         class="pull-left input-width-lg"
+                         @update:modelValue="onActionChange" />
+        </template>
+
+        <SelectColumn />
+
+        <TextColumn name="person"
+                    title="Person"
+                    field="person"
+                    :filter="textValueFilter"
+                    visiblePriority="xs" />
+
+        <TextColumn name="ptoType"
+                    title="PTO Type"
+                    field="ptoType"
+                    :filter="textValueFilter"
+                    visiblePriority="xs" />
+
+        <TextColumn name="ptoAllocationSourceType"
+                    title="Source"
+                    field="ptoAllocationSourceType"
+                    :filter="pickExistingValueFilter"
+                    visiblePriority="xs" />
+
+        <NumberColumn name="hours"
+                       title="Total Hours"
+                       field="hours"
+                       :filter="numberValueFilter"
+                       visiblePriority="xs" />
+
+        <DateColumn name="startDate"
+                    title="Start Date"
+                    field="startDate"
+                    :filter="dateValueFilter"
+                    visiblePriority="xs" />
+
+        <DateColumn name="endDate"
+                    title="End Date"
+                    field="endDate"
+                    :filter="dateValueFilter"
+                    visiblePriority="xs" />
+
+        <LabelColumn name="ptoAllocationStatus"
+                     title="Status"
+                     field="ptoAllocationStatus"
+                     :filter="pickExistingValueFilter"
+                     :classSource="{ Active: 'info', Inactive: 'default', Pending: 'warning', Denied: 'danger' }"
+                     visiblePriority="xs" />
+
+        <AttributeColumns :attributes="config.gridDefinition?.attributeFields ?? []" />
+
+        <DeleteColumn v-if="config.isDeleteEnabled" @click="onDeleteClick" />
+    </Grid>
+</template>
+
+<script setup lang="ts">
+import { onConfigurationValuesChanged, useConfigurationValues, useInvokeBlockAction, useReloadBlock } from "@Obsidian/Utility/block";
+import Grid, { AttributeColumns, DateColumn, dateValueFilter, LabelColumn, NumberColumn, numberValueFilter, pickExistingValueFilter, TextColumn, textValueFilter, DeleteColumn, SelectColumn } from "@Obsidian/Controls/grid";
+import { alert, confirm } from "@Obsidian/Utility/dialogs";
+import { ListBlockBox } from "@Obsidian/ViewModels/Blocks/listBlockBox";
+import { PtoAllocationListOptionsBag } from "./viewModels";
+import { GridDataBag } from "@Obsidian/ViewModels/Core/Grid/gridDataBag";
+import { NavigationUrlKey } from "./PtoAllocationList/types.partial";
+import { reactive, ref } from "vue";
+import NotificationBox from "@Obsidian/Controls/notificationBox.obs";
+import DropDownList from "@Obsidian/Controls/dropDownList.obs";
+import { ListItemBag } from "@Obsidian/ViewModels/Utility/listItemBag";
+
+const config = useConfigurationValues<ListBlockBox<PtoAllocationListOptionsBag>>();
+const invokeBlockAction = useInvokeBlockAction();
+
+// All blocks auto reload when changing block settings unless there is an
+// explicit reason not to (like using a custom reload function instead),
+// in which case you can remove this code.
+onConfigurationValuesChanged(useReloadBlock());
+
+// #region Values
+
+const gridDataSource = ref<Promise<GridDataBag>>();
+let gridData: GridDataBag | undefined;
+const selectedAction = ref<string>("");
+const resultMessage = ref<string>("");
+const resultAlertType = ref<"success" | "danger" | "warning" | "info">("success");
+
+const actionItems: ListItemBag[] = [
+    { value: "ACTIVATE", text: "Activate" },
+    { value: "INACTIVATE", text: "Inactivate" }
+];
+
+// #endregion
+
+// #region Functions
+
+/**
+ * Called when the grid is requesting the row data be loaded.
+ */
+async function loadGridData(): Promise<GridDataBag> {
+    const result = await invokeBlockAction<GridDataBag>("GetGridData");
+
+    if (result.isSuccess && result.data) {
+        gridData = reactive(result.data);
+        return gridData;
+    }
+    else {
+        throw new Error(result.errorMessage ?? "Unknown error while trying to load grid data.");
+    }
+}
+
+// #endregion
+
+// #region Event Handlers
+
+/**
+ * Called when a row has been selected by the individual.
+ *
+ * @param key The key of the row that was selected.
+ */
+function onSelectItem(key: string): void {
+    if (config.navigationUrls?.[NavigationUrlKey.DetailPage]) {
+        window.location.href = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", key);
+    }
+}
+
+/**
+ * Called when a row's delete button has been clicked by the individual. This
+ * happens only if they have confirmed the delete action.
+ */
+async function onDeleteClick(key: string): Promise<void> {
+    const result = await invokeBlockAction<string>("Delete", {
+        key
+    });
+
+    if (result.isSuccess) {
+        if (gridData && gridData.rows) {
+            const index = gridData.rows.findIndex(r => r["idKey"] === key);
+
+            if (index !== -1) {
+                gridData.rows?.splice(index, 1);
+            }
+        }
+    }
+    else {
+        await alert(result.errorMessage ?? "Unknown error while trying to delete pto allocation.");
+    }
+}
+
+/**
+ * Called when the Add button has been clicked by the individual.
+ */
+function onAddItem(): void {
+    if (config.navigationUrls?.[NavigationUrlKey.DetailPage]) {
+        window.location.href = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", "0");
+    }
+}
+
+/**
+ * Called when the action dropdown value changes.
+ */
+async function onActionChange(): Promise<void> {
+    if (!selectedAction.value || !gridData || !gridData.rows) {
+        return;
+    }
+
+    // Get selected row keys
+    const selectedKeys = gridData.rows
+        .filter((row: any) => row.__isSelected)
+        .map((row: any) => row.idKey);
+
+    if (selectedKeys.length === 0) {
+        selectedAction.value = "";
+        return;
+    }
+
+    const actionText = selectedAction.value === "ACTIVATE" ? "activate" : "inactivate";
+    const confirmed = await confirm(
+        `Are you sure you want to ${actionText} the selected allocations?`
+    );
+
+    if (!confirmed) {
+        selectedAction.value = "";
+        return;
+    }
+
+    const result = await invokeBlockAction<{ count: number, status: string }>("BulkStatusUpdate", {
+        keys: selectedKeys,
+        action: selectedAction.value
+    });
+
+    if (result.isSuccess && result.data) {
+        resultMessage.value = `${result.data.count} allocations were ${actionText}d.`;
+        resultAlertType.value = "success";
+        gridDataSource.value = loadGridData();
+    }
+    else {
+        resultMessage.value = result.errorMessage ?? "Unknown error while trying to update allocations.";
+        resultAlertType.value = "danger";
+    }
+
+    selectedAction.value = "";
+}
+
+// #endregion
+
+gridDataSource.value = loadGridData();
+</script>

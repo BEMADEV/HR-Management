@@ -32,6 +32,7 @@ namespace com.bemaservices.HrManagement.Model
     /// A Reservation Location
     /// </summary>
     [Table( "_com_bemaservices_HrManagement_PtoTier" )]
+    [Rock.SystemGuid.EntityTypeGuid( "9C7F0A71-23B9-4F8D-A104-7BB521F3EB0E" )]
     [DataContract]
     public class PtoTier : Rock.Data.Model<PtoTier>, Rock.Data.IRockEntity
     {

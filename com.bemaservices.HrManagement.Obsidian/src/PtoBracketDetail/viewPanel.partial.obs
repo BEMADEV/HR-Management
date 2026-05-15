@@ -1,0 +1,121 @@
+<template>
+    <fieldset>
+        <ValueDetailList :modelValue="leftSideValues" />
+
+        <section class="panel panel-widget mt-3">
+            <div class="panel-heading">
+                <h3 class="panel-title">PTO Allocations</h3>
+            </div>
+
+            <div class="panel-body p-0">
+                <Grid :data="ptoBracketTypesGridData"
+                      keyField="guid"
+                      itemTerm="PTO Allocation"
+                      light>
+                    <TextColumn name="ptoType"
+                                title="PTO Type"
+                                field="ptoType"
+                                :filter="textValueFilter"
+                                visiblePriority="xs" />
+
+                    <NumberColumn name="defaultHours"
+                                  title="Default Hours Allocated"
+                                  field="defaultHours"
+                                  :filter="numberValueFilter"
+                                  visiblePriority="xs" />
+
+                    <BooleanColumn name="isActive"
+                                   title="Active"
+                                   field="isActive"
+                                   visiblePriority="xs" />
+                </Grid>
+            </div>
+        </section>
+
+        <AttributeValuesContainer :modelValue="attributeValues" :attributes="attributes" :numberOfColumns="2" />
+    </fieldset>
+</template>
+
+<script setup lang="ts">
+import { computed, PropType, ref } from "vue";
+import AttributeValuesContainer from "@Obsidian/Controls/attributeValuesContainer.obs";
+import Grid, { BooleanColumn, NumberColumn, numberValueFilter, TextColumn, textValueFilter } from "@Obsidian/Controls/grid";
+import ValueDetailList from "@Obsidian/Controls/valueDetailList.obs";
+import { ValueDetailListItemBuilder } from "@Obsidian/Core/Controls/valueDetailListItemBuilder";
+import { GridDataBag } from "@Obsidian/ViewModels/Core/Grid/gridDataBag";
+import { ValueDetailListItem } from "@Obsidian/Types/Controls/valueDetailListItem";
+import { PtoBracketBag, PtoBracketDetailOptionsBag } from "../viewModels";
+import { ListItemBag } from "@Obsidian/ViewModels/Utility/listItemBag";
+
+type PtoBracketTypeBag = {
+    defaultHours: number;
+    guid: string;
+    isActive: boolean;
+    ptoType?: ListItemBag | null;
+};
+
+type PtoBracketViewBag = PtoBracketBag & {
+    ptoBracketTypes?: PtoBracketTypeBag[] | null;
+};
+
+const props = defineProps({
+    modelValue: {
+        type: Object as PropType<PtoBracketViewBag | null>,
+        required: false
+    },
+
+    options: {
+        type: Object as PropType<PtoBracketDetailOptionsBag>,
+        required: true
+    }
+});
+
+// #region Values
+
+const attributes = ref(props.modelValue?.attributes ?? {});
+const attributeValues = ref(props.modelValue?.attributeValues ?? {});
+
+// #endregion
+
+// #region Computed Values
+
+/** The values to display at half-width on the left side of the block. */
+const leftSideValues = computed((): ValueDetailListItem[] => {
+    const valueBuilder = new ValueDetailListItemBuilder();
+
+    if (!props.modelValue) {
+        return valueBuilder.build();
+    }
+
+    valueBuilder.addTextValue("Minimum Years", props.modelValue.minimumYear?.toString() ?? "");
+    valueBuilder.addTextValue("Maximum Years", props.modelValue.maximumYear?.toString() ?? "");
+    valueBuilder.addTextValue("Active", props.modelValue.isActive ? "Yes" : "No");
+
+    return valueBuilder.build();
+});
+
+const ptoBracketTypesGridData = computed((): GridDataBag => {
+    const ptoBracketTypes = props.modelValue?.ptoBracketTypes ?? [];
+
+    return {
+        rows: ptoBracketTypes.map(item => {
+            return {
+                guid: item.guid,
+                ptoType: item.ptoType?.text ?? "",
+                defaultHours: item.defaultHours,
+                isActive: item.isActive
+            };
+        })
+    };
+});
+
+// #endregion
+
+// #region Functions
+
+// #endregion
+
+// #region Event Handlers
+
+// #endregion
+</script>

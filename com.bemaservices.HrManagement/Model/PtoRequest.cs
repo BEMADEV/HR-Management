@@ -31,6 +31,7 @@ namespace com.bemaservices.HrManagement.Model
     /// A Reservation Location
     /// </summary>
     [Table( "_com_bemaservices_HrManagement_PtoRequest" )]
+    [Rock.SystemGuid.EntityTypeGuid( "F38B7BA2-1289-4CFE-AFD4-74DF942280D8" )]
     [DataContract]
     public class PtoRequest : Rock.Data.Model<PtoRequest>, Rock.Data.IRockEntity
     {

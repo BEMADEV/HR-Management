@@ -1,0 +1,289 @@
+<template>
+    <fieldset>
+        <div class="row">
+            <div class="col-md-6">
+                <NumberBox v-model="minimumYear"
+                           label="Minimum Years"
+                           :decimalCount="0"
+                           :minimumValue="0"
+                           rules="required" />
+
+                <NumberBox v-model="maximumYear"
+                           label="Maximum Years"
+                           :decimalCount="0"
+                           :minimumValue="0" />
+            </div>
+
+            <div class="col-md-6">
+                <CheckBox v-model="isActive"
+                          label="Active" />
+            </div>
+        </div>
+
+        <section class="panel panel-widget mt-3">
+            <div class="panel-heading">
+                <h3 class="panel-title">PTO Allocations</h3>
+            </div>
+
+            <div class="panel-body p-0">
+                <Grid :data="ptoBracketTypesGridData"
+                      keyField="guid"
+                      itemTerm="PTO Allocation"
+                      light
+                      :onAddItem="onAddPtoBracketType"
+                      @selectItem="onEditPtoBracketType">
+                    <TextColumn name="ptoType"
+                                title="PTO Type"
+                                field="ptoType"
+                                :filter="textValueFilter"
+                                visiblePriority="xs" />
+
+                    <NumberColumn name="defaultHours"
+                                  title="Default Hours Allocated"
+                                  field="defaultHours"
+                                  :filter="numberValueFilter"
+                                  visiblePriority="xs" />
+
+                    <BooleanColumn name="isActive"
+                                   title="Active"
+                                   field="isActive"
+                                   visiblePriority="xs" />
+
+                    <DeleteColumn @click="onDeletePtoBracketType" />
+                </Grid>
+            </div>
+        </section>
+
+        <AttributeValuesContainer v-model="attributeValues" :attributes="attributes" isEditMode :numberOfColumns="2" />
+    </fieldset>
+
+    <Modal v-model="isPtoBracketTypeModalOpen"
+           title="PTO Allocation Configuration"
+           :saveText="ptoBracketTypeModalSaveText"
+           @save="onSavePtoBracketType">
+        <div class="row">
+            <div class="col-md-4">
+                <DropDownList v-model="selectedPtoTypeValue"
+                              label="PTO Type"
+                              :items="ptoTypeOptions"
+                              rules="required" />
+            </div>
+
+            <div class="col-md-4">
+                <NumberBox v-model="defaultHours"
+                           label="Default Hours"
+                           help="The number of hours the person will accrue on an annual basis for this PTO Type."
+                           :minimumValue="1"
+                           :decimalCount="0"
+                           rules="required" />
+            </div>
+
+            <div class="col-md-4">
+                <CheckBox v-model="ptoBracketTypeIsActive"
+                          label="Active" />
+            </div>
+        </div>
+    </Modal>
+</template>
+
+<script setup lang="ts">
+import { computed, PropType, ref, watch } from "vue";
+import AttributeValuesContainer from "@Obsidian/Controls/attributeValuesContainer.obs";
+import CheckBox from "@Obsidian/Controls/checkBox.obs";
+import DropDownList from "@Obsidian/Controls/dropDownList.obs";
+import Grid, { BooleanColumn, DeleteColumn, NumberColumn, numberValueFilter, TextColumn, textValueFilter } from "@Obsidian/Controls/grid";
+import Modal from "@Obsidian/Controls/modal.obs";
+import NumberBox from "@Obsidian/Controls/numberBox.obs";
+import { alert } from "@Obsidian/Utility/dialogs";
+import { setPropertiesBoxValue, watchPropertyChanges } from "@Obsidian/Utility/block";
+import { propertyRef, updateRefValue } from "@Obsidian/Utility/component";
+import { PtoBracketBag, PtoBracketDetailOptionsBag } from "../viewModels";
+import { GridDataBag } from "@Obsidian/ViewModels/Core/Grid/gridDataBag";
+import { ListItemBag } from "@Obsidian/ViewModels/Utility/listItemBag";
+import { ValidPropertiesBox } from "@Obsidian/ViewModels/Utility/validPropertiesBox";
+
+type PtoBracketTypeBag = {
+    defaultHours: number;
+    guid: string;
+    isActive: boolean;
+    ptoType?: ListItemBag | null;
+};
+
+type PtoBracketEditBag = PtoBracketBag & {
+    ptoBracketTypes?: PtoBracketTypeBag[] | null;
+};
+
+type PtoBracketDetailOptions = PtoBracketDetailOptionsBag & {
+    ptoTypeOptions?: ListItemBag[] | null;
+};
+
+const props = defineProps({
+    modelValue: {
+        type: Object as PropType<ValidPropertiesBox<PtoBracketEditBag>>,
+        required: true
+    },
+
+    options: {
+        type: Object as PropType<PtoBracketDetailOptions>,
+        required: true
+    }
+});
+
+const emit = defineEmits<{
+    (e: "update:modelValue", value: ValidPropertiesBox<PtoBracketEditBag>): void,
+    (e: "propertyChanged", value: string): void
+}>();
+
+// #region Values
+
+const attributes = ref(props.modelValue.bag?.attributes ?? {});
+const attributeValues = ref(props.modelValue.bag?.attributeValues ?? {});
+const minimumYear = propertyRef(props.modelValue.bag?.minimumYear ?? 0, "MinimumYear");
+const maximumYear = propertyRef(props.modelValue.bag?.maximumYear ?? null, "MaximumYear");
+const isActive = propertyRef(props.modelValue.bag?.isActive ?? false, "IsActive");
+const ptoBracketTypes = ref<PtoBracketTypeBag[]>([...(props.modelValue.bag?.ptoBracketTypes ?? [])]);
+const isPtoBracketTypeModalOpen = ref(false);
+const ptoBracketTypeModalSaveText = ref("Add");
+const editingPtoBracketTypeGuid = ref("");
+const selectedPtoTypeValue = ref("");
+const defaultHours = ref<number | null>(null);
+const ptoBracketTypeIsActive = ref(true);
+
+// The properties that are being edited. This should only contain
+// objects returned by propertyRef().
+const propRefs = [minimumYear, maximumYear, isActive];
+const ptoTypeOptions = ref<ListItemBag[]>(props.options?.ptoTypeOptions ?? []);
+
+// #endregion
+
+// #region Computed Values
+
+const ptoBracketTypesGridData = computed((): GridDataBag => {
+    return {
+        rows: ptoBracketTypes.value.map(item => {
+            return {
+                guid: item.guid,
+                ptoType: item.ptoType?.text ?? "",
+                defaultHours: item.defaultHours,
+                isActive: item.isActive
+            };
+        })
+    };
+});
+
+// #endregion
+
+// #region Functions
+
+// #endregion
+
+// #region Event Handlers
+
+// #endregion
+
+// Watch for parental changes in our model value and update all our values.
+watch(() => props.modelValue, () => {
+    updateRefValue(attributes, props.modelValue.bag?.attributes ?? {});
+    updateRefValue(attributeValues, props.modelValue.bag?.attributeValues ?? {});
+    updateRefValue(minimumYear, props.modelValue.bag?.minimumYear ?? 0);
+    updateRefValue(maximumYear, props.modelValue.bag?.maximumYear ?? null);
+    updateRefValue(isActive, props.modelValue.bag?.isActive ?? false);
+    updateRefValue(ptoBracketTypes, [...(props.modelValue.bag?.ptoBracketTypes ?? [])]);
+    updateRefValue(ptoTypeOptions, props.options?.ptoTypeOptions ?? []);
+});
+
+// Determines which values we want to track changes on (defined in the
+// array) and then emit a new object defined as newValue.
+watch([attributeValues, ...propRefs], () => {
+    const newValue: ValidPropertiesBox<PtoBracketEditBag> = {
+        bag: { ...props.modelValue.bag } as PtoBracketEditBag
+    };
+
+    setPropertiesBoxValue(newValue, "attributeValues", attributeValues.value);
+    setPropertiesBoxValue(newValue, "minimumYear", minimumYear.value);
+    setPropertiesBoxValue(newValue, "maximumYear", maximumYear.value);
+    setPropertiesBoxValue(newValue, "isActive", isActive.value);
+    setPropertiesBoxValue(newValue, "ptoBracketTypes", ptoBracketTypes.value);
+
+    emit("update:modelValue", newValue);
+});
+
+watch(ptoBracketTypes, () => {
+    emit("propertyChanged", "PtoBracketTypes");
+}, { deep: true });
+
+function createClientGuid(): string {
+    return window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
+}
+
+function resetPtoBracketTypeModal(): void {
+    editingPtoBracketTypeGuid.value = "";
+    selectedPtoTypeValue.value = "";
+    defaultHours.value = null;
+    ptoBracketTypeIsActive.value = true;
+    ptoBracketTypeModalSaveText.value = "Add";
+}
+
+function onAddPtoBracketType(): void {
+    resetPtoBracketTypeModal();
+    isPtoBracketTypeModalOpen.value = true;
+}
+
+function onEditPtoBracketType(guid: string): void {
+    const item = ptoBracketTypes.value.find(i => i.guid === guid);
+
+    if (!item) {
+        return;
+    }
+
+    editingPtoBracketTypeGuid.value = item.guid;
+    selectedPtoTypeValue.value = item.ptoType?.value ?? "";
+    defaultHours.value = item.defaultHours;
+    ptoBracketTypeIsActive.value = item.isActive;
+    ptoBracketTypeModalSaveText.value = "Save";
+    isPtoBracketTypeModalOpen.value = true;
+}
+
+function onDeletePtoBracketType(guid: string): void {
+    ptoBracketTypes.value = ptoBracketTypes.value.filter(i => i.guid !== guid);
+}
+
+async function onSavePtoBracketType(): Promise<void> {
+    if (!selectedPtoTypeValue.value) {
+        await alert("PTO Type is required.");
+        return;
+    }
+
+    if (!defaultHours.value || defaultHours.value < 1) {
+        await alert("Default Hours must be at least 1.");
+        return;
+    }
+
+    const selectedPtoType = ptoTypeOptions.value.find(i => i.value === selectedPtoTypeValue.value) ?? null;
+
+    const updatedItem: PtoBracketTypeBag = {
+        guid: editingPtoBracketTypeGuid.value || createClientGuid(),
+        ptoType: selectedPtoType,
+        defaultHours: defaultHours.value,
+        isActive: ptoBracketTypeIsActive.value
+    };
+
+    const existingIndex = ptoBracketTypes.value.findIndex(i => i.guid === updatedItem.guid);
+
+    if (existingIndex >= 0) {
+        const next = [...ptoBracketTypes.value];
+        next[existingIndex] = updatedItem;
+        ptoBracketTypes.value = next;
+    }
+    else {
+        ptoBracketTypes.value = [...ptoBracketTypes.value, updatedItem];
+    }
+
+    isPtoBracketTypeModalOpen.value = false;
+    resetPtoBracketTypeModal();
+}
+
+// Watch for any changes to props that represent properties and then
+// automatically emit which property changed.
+watchPropertyChanges(propRefs, emit);
+</script>

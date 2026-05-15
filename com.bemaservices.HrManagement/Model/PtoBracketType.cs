@@ -30,6 +30,7 @@ namespace com.bemaservices.HrManagement.Model
     /// A Reservation Location
     /// </summary>
     [Table( "_com_bemaservices_HrManagement_PtoBracketType" )]
+    [Rock.SystemGuid.EntityTypeGuid( "1632165E-246B-420C-AFE2-79BEE19BB3D0" )]
     [DataContract]
     public class PtoBracketType : Rock.Data.Model<PtoBracketType>, Rock.Data.IRockEntity
     {
