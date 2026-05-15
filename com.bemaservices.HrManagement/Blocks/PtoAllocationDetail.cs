@@ -83,6 +83,16 @@ namespace com.bemaservices.HrManagement.Blocks
         {
             var options = new PtoAllocationDetailOptionsBag();
 
+            var ptoTypes = new PtoTypeService( RockContext )
+                .Queryable()
+                .Where( p => p.IsActive == true )
+                .OrderBy( p => p.Name )
+                .ToList()
+                .Select( p => p.ToListItemBag() )
+                .ToList();
+
+            options.PtoTypes = ptoTypes;
+
             return options;
         }
 
@@ -258,7 +268,18 @@ namespace com.bemaservices.HrManagement.Blocks
         /// <inheritdoc/>
         protected override PtoAllocation GetInitialEntity()
         {
-            return GetInitialEntity<PtoAllocation, PtoAllocationService>( RockContext, PageParameterKey.PtoAllocationId );
+            var entity = GetInitialEntity<PtoAllocation, PtoAllocationService>( RockContext, PageParameterKey.PtoAllocationId );
+
+            if ( entity != null )
+            {
+                // Load related entities
+                var service = new PtoAllocationService( RockContext );
+                entity = service.Queryable()
+                    .Where( a => a.Id == entity.Id )
+                    .FirstOrDefault();
+            }
+
+            return entity;
         }
 
         /// <summary>

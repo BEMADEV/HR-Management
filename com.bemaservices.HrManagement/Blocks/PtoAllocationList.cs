@@ -124,13 +124,16 @@ namespace com.bemaservices.HrManagement.Blocks
             return new GridBuilder<PtoAllocation>()
                 .WithBlock( this )
                 .AddTextField( "idKey", a => a.IdKey )
-                .AddDateTimeField( "endDate", a => a.EndDate )
-                .AddField( "hours", a => a.Hours )
-                .AddPersonField( "person", a => a.PersonAlias?.Person )
-                .AddField( "ptoAllocationSourceType", a => a.PtoAllocationSourceType )
-                .AddField( "ptoAllocationStatus", a => a.PtoAllocationStatus )
+                .AddTextField( "person", a => a.PersonAlias != null && a.PersonAlias.Person != null
+                    ? a.PersonAlias.Person.NickName + " " + a.PersonAlias.Person.LastName
+                    : string.Empty )
                 .AddTextField( "ptoType", a => a.PtoType?.Name )
+                .AddTextField( "ptoAllocationSourceType", a => a.PtoAllocationSourceType.ToString() )
+                .AddField( "hours", a => a.Hours )
                 .AddDateTimeField( "startDate", a => a.StartDate )
+                .AddDateTimeField( "endDate", a => a.EndDate )
+                .AddTextField( "accrualSchedule", a => a.PtoAccrualSchedule.ToString() )
+                .AddTextField( "ptoAllocationStatus", a => a.PtoAllocationStatus.ConvertToString() )
                 .AddAttributeFields( GetGridAttributes() );
         }
 
@@ -163,6 +166,43 @@ namespace com.bemaservices.HrManagement.Blocks
             RockContext.SaveChanges();
 
             return ActionOk();
+        }
+
+        /// <summary>
+        /// Updates the status of multiple allocations.
+        /// </summary>
+        /// <param name="keys">The identifiers of the entities to be updated.</param>
+        /// <param name="action">The action to perform (ACTIVATE or INACTIVATE).</param>
+        /// <returns>A result that indicates if the operation succeeded.</returns>
+        [BlockAction]
+        public BlockActionResult BulkStatusUpdate( List<string> keys, string action )
+        {
+            if ( keys == null || !keys.Any() )
+            {
+                return ActionBadRequest( "No allocations selected." );
+            }
+
+            var entityService = new PtoAllocationService( RockContext );
+            var newStatus = action == "ACTIVATE" ? Enums.PtoAllocationStatus.Active : Enums.PtoAllocationStatus.Inactive;
+            var updatedCount = 0;
+
+            foreach ( var key in keys )
+            {
+                var entity = entityService.Get( key, !PageCache.Layout.Site.DisablePredictableIds );
+
+                if ( entity != null && entity.IsAuthorized( Authorization.EDIT, RequestContext.CurrentPerson ) )
+                {
+                    if ( entity.PtoAllocationStatus != newStatus )
+                    {
+                        entity.PtoAllocationStatus = newStatus;
+                        updatedCount++;
+                    }
+                }
+            }
+
+            RockContext.SaveChanges();
+
+            return ActionOk( new { count = updatedCount, status = newStatus.ToString() } );
         }
 
         #endregion

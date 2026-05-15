@@ -41,6 +41,7 @@ import { NavigationUrlKey } from "./PtoAllocationDetail/types.partial";
 import { DetailBlockBox } from "@Obsidian/ViewModels/Blocks/detailBlockBox";
 import { PtoAllocationBag, PtoAllocationDetailOptionsBag } from "./viewModels";
 import { ValidPropertiesBox } from "@Obsidian/ViewModels/Utility/validPropertiesBox";
+import { PtoAllocationStatusDescription } from "./enums.partial";
 
 const config = useConfigurationValues<DetailBlockBox<PtoAllocationBag, PtoAllocationDetailOptionsBag>>();
 const invokeBlockAction = useInvokeBlockAction();
@@ -75,7 +76,19 @@ const baseBlock = useEntityDetailBlock({
  * The entity name to display in the block panel.
  */
 const panelName = computed((): string => {
-    return "TODO: Fill Me In";
+    if (!ptoAllocationViewBag.value) {
+        return "PTO Allocation";
+    }
+
+    if (!ptoAllocationViewBag.value.idKey) {
+        return "Add PTO Allocation";
+    }
+
+    if (ptoAllocationViewBag.value.personAlias && ptoAllocationViewBag.value.ptoType) {
+        return `${ptoAllocationViewBag.value.personAlias.text} - ${ptoAllocationViewBag.value.ptoType.text}`;
+    }
+
+    return "PTO Allocation";
 });
 
 /**
@@ -93,6 +106,33 @@ const blockLabels = computed((): PanelAction[] | undefined => {
 
     if (panelMode.value !== DetailPanelMode.View) {
         return undefined;
+    }
+
+    if (ptoAllocationViewBag.value?.ptoAllocationStatus !== undefined) {
+        const status = ptoAllocationViewBag.value.ptoAllocationStatus;
+        let labelType = "default";
+
+        switch (status) {
+            case 0: // Inactive
+                labelType = "danger";
+                break;
+            case 1: // Active
+                labelType = "info";
+                break;
+            case 2: // Pending
+                labelType = "warning";
+                break;
+            case 3: // Denied
+                labelType = "danger";
+                break;
+        }
+
+        labels.push({
+            type: "default",
+            title: PtoAllocationStatusDescription[status],
+            iconCssClass: "",
+            handler: () => { }
+        });
     }
 
     return labels;

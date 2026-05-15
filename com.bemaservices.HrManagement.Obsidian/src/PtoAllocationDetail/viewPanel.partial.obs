@@ -1,17 +1,14 @@
 <template>
     <fieldset>
-
-        <ValueDetailList :modelValue="topValues" />
-
         <div class="row">
             <div class="col-md-6">
                 <ValueDetailList :modelValue="leftSideValues" />
             </div>
-
-            <div class="col-md-6">
-                <ValueDetailList :modelValue="rightSideValues" />
-            </div>
         </div>
+
+        <p class="description" v-if="props.modelValue?.note">
+            {{ props.modelValue.note }}
+        </p>
 
         <AttributeValuesContainer :modelValue="attributeValues" :attributes="attributes" :numberOfColumns="2" />
     </fieldset>
@@ -63,6 +60,21 @@ const leftSideValues = computed((): ValueDetailListItem[] => {
 
     if (!props.modelValue) {
         return valueBuilder.build();
+    }
+
+    if (props.modelValue.personAlias) {
+        valueBuilder.addTextValue("Person", props.modelValue.personAlias.text ?? "");
+    }
+
+    if (props.modelValue.ptoType) {
+        const ptoTypeText = `${props.modelValue.ptoType.text}: ${props.modelValue.hours} hours`;
+        valueBuilder.addTextValue("PTO Type", ptoTypeText);
+    }
+
+    if (props.modelValue.startDate) {
+        const startDate = new Date(props.modelValue.startDate).toLocaleDateString();
+        const endDate = props.modelValue.endDate ? " - " + new Date(props.modelValue.endDate).toLocaleDateString() : "";
+        valueBuilder.addTextValue("Date", startDate + endDate);
     }
 
     return valueBuilder.build();

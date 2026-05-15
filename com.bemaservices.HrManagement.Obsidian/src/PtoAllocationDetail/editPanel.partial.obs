@@ -1,17 +1,61 @@
 <template>
     <fieldset>
+        <div class="row">
+            <div class="col-md-6">
+                <PersonPicker v-model="person"
+                             label="Person"
+                             rules="required"
+                             :enhanceForLongLists="true" />
+
+                <DropDownList v-model="ptoType"
+                             label="PTO Type"
+                             :items="ptoTypeItems"
+                             rules="required" />
+
+                <DatePicker v-model="startDate"
+                           label="Start Date"
+                           rules="required" />
+            </div>
+
+            <div class="col-md-6">
+                <DropDownList v-model="status"
+                             label="Status"
+                             :items="statusItems" />
+
+                <NumberBox v-model="hours"
+                          label="Hours"
+                          :decimalCount="1"
+                          :minimumValue="0.1"
+                          rules="required" />
+
+                <DatePicker v-model="endDate"
+                           label="End Date" />
+            </div>
+        </div>
+
+        <TextBox v-model="note"
+                label="Note"
+                textMode="multiline"
+                :rows="4" />
 
         <AttributeValuesContainer v-model="attributeValues" :attributes="attributes" isEditMode :numberOfColumns="2" />
     </fieldset>
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watch } from "vue";
+import { computed, PropType, ref, watch } from "vue";
 import AttributeValuesContainer from "@Obsidian/Controls/attributeValuesContainer.obs";
+import PersonPicker from "@Obsidian/Controls/personPicker.obs";
+import DropDownList from "@Obsidian/Controls/dropDownList.obs";
+import DatePicker from "@Obsidian/Controls/datePicker.obs";
+import NumberBox from "@Obsidian/Controls/numberBox.obs";
+import TextBox from "@Obsidian/Controls/textBox.obs";
 import { setPropertiesBoxValue, watchPropertyChanges } from "@Obsidian/Utility/block";
 import { propertyRef, updateRefValue } from "@Obsidian/Utility/component";
 import { PtoAllocationBag, PtoAllocationDetailOptionsBag } from "../viewModels";
 import { ValidPropertiesBox } from "@Obsidian/ViewModels/Utility/validPropertiesBox";
+import { ListItemBag } from "@Obsidian/ViewModels/Utility/listItemBag";
+import { PtoAllocationStatus, PtoAllocationStatusDescription } from "../enums.partial";
 
 const props = defineProps({
     modelValue: {
@@ -34,14 +78,32 @@ const emit = defineEmits<{
 
 const attributes = ref(props.modelValue.bag?.attributes ?? {});
 const attributeValues = ref(props.modelValue.bag?.attributeValues ?? {});
+const person = propertyRef(props.modelValue.bag?.personAlias ?? undefined, "PersonAlias");
+const ptoType = propertyRef(props.modelValue.bag?.ptoType?.value ?? "", "PtoType");
+const status = propertyRef((props.modelValue.bag?.ptoAllocationStatus ?? PtoAllocationStatus.Active).toString(), "PtoAllocationStatus");
+const hours = propertyRef(props.modelValue.bag?.hours ?? 0, "Hours");
+const startDate = propertyRef(props.modelValue.bag?.startDate ?? "", "StartDate");
+const endDate = propertyRef(props.modelValue.bag?.endDate ?? null, "EndDate");
+const note = propertyRef(props.modelValue.bag?.note ?? "", "Note");
 
 // The properties that are being edited. This should only contain
 // objects returned by propertyRef().
-const propRefs = [];
+const propRefs = [person, ptoType, status, hours, startDate, endDate, note];
 
 // #endregion
 
 // #region Computed Values
+
+const statusItems = computed((): ListItemBag[] => {
+    return Object.keys(PtoAllocationStatus).map(key => ({
+        value: PtoAllocationStatus[key as keyof typeof PtoAllocationStatus].toString(),
+        text: PtoAllocationStatusDescription[PtoAllocationStatus[key as keyof typeof PtoAllocationStatus]]
+    }));
+});
+
+const ptoTypeItems = computed((): ListItemBag[] => {
+    return props.options.ptoTypes ?? [];
+});
 
 // #endregion
 
@@ -57,6 +119,13 @@ const propRefs = [];
 watch(() => props.modelValue, () => {
     updateRefValue(attributes, props.modelValue.bag?.attributes ?? {});
     updateRefValue(attributeValues, props.modelValue.bag?.attributeValues ?? {});
+    updateRefValue(person, props.modelValue.bag?.personAlias ?? undefined);
+    updateRefValue(ptoType, props.modelValue.bag?.ptoType?.value ?? "");
+    updateRefValue(status, (props.modelValue.bag?.ptoAllocationStatus ?? PtoAllocationStatus.Active).toString());
+    updateRefValue(hours, props.modelValue.bag?.hours ?? 0);
+    updateRefValue(startDate, props.modelValue.bag?.startDate ?? "");
+    updateRefValue(endDate, props.modelValue.bag?.endDate ?? null);
+    updateRefValue(note, props.modelValue.bag?.note ?? "");
 });
 
 // Determines which values we want to track changes on (defined in the
@@ -67,6 +136,22 @@ watch([attributeValues, ...propRefs], () => {
     };
 
     setPropertiesBoxValue(newValue, "attributeValues", attributeValues.value);
+
+    // Convert person value back to ListItemBag
+    if (person.value) {
+        setPropertiesBoxValue(newValue, "personAlias", person.value);
+    }
+
+    // Convert ptoType value back to ListItemBag
+    if (ptoType.value) {
+        setPropertiesBoxValue(newValue, "ptoType", { value: ptoType.value, text: "" });
+    }
+
+    setPropertiesBoxValue(newValue, "ptoAllocationStatus", parseInt(status.value) as PtoAllocationStatus);
+    setPropertiesBoxValue(newValue, "hours", hours.value);
+    setPropertiesBoxValue(newValue, "startDate", startDate.value);
+    setPropertiesBoxValue(newValue, "endDate", endDate.value);
+    setPropertiesBoxValue(newValue, "note", note.value);
 
     emit("update:modelValue", newValue);
 });

@@ -29,6 +29,7 @@ export type PtoAllocationBag = {
 };
 
 export type PtoAllocationDetailOptionsBag = {
+    ptoTypes?: ListItemBag[] | null;
 };
 
 export type PtoAllocationListOptionsBag = {
@@ -108,4 +109,14 @@ export type PtoTypeBag = {
 
 export type PtoTypeListOptionsBag = {
     ptoCalendarFeedUrl?: string | null;
+};
+
+export type HrEmployeeListOptionsBag = {
+    ptoTypes?: ListItemBag[] | null;
+
+    fiscalYears?: ListItemBag[] | null;
+
+    showSupervisorFilter: boolean;
+
+    showMinistryAreaFilter: boolean;
 };

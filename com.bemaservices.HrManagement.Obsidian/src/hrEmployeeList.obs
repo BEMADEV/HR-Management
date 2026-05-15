@@ -1,0 +1,229 @@
+<template>
+    <Grid :definition="config.gridDefinition ?? undefined"
+          :data="gridDataSource"
+          keyField="idKey"
+          itemTerm="Employee"
+          :entityTypeGuid="entityTypeGuid"
+          stickyHeader
+          liveUpdates
+          @selectItem="onSelectItem">
+
+        <template #gridHeaderPrepend>
+            <div class="grid-filter-entry">
+                <div class="row">
+                    <div class="col-md-3">
+                        <DropDownList v-model="fiscalYearEnd"
+                                      label="Fiscal Year End"
+                                      :items="fiscalYearItems"
+                                      :showBlankItem="true"
+                                      blankValue=""
+                                      @update:modelValue="onFilterChange" />
+                    </div>
+                    <div class="col-md-3">
+                        <DropDownList v-model="ptoTypeId"
+                                      label="PTO Type"
+                                      :items="ptoTypeItems"
+                                      :showBlankItem="true"
+                                      blankValue=""
+                                      @update:modelValue="onFilterChange" />
+                    </div>
+                    <div class="col-md-3" v-if="config.options?.showSupervisorFilter">
+                        <PersonPicker v-model="supervisor"
+                                      label="Supervisor"
+                                      @update:modelValue="onFilterChange" />
+                    </div>
+                    <div class="col-md-3" v-if="config.options?.showMinistryAreaFilter">
+                        <TextBox v-model="ministryArea"
+                                 label="Ministry Area"
+                                 @update:modelValue="onFilterChange" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <CheckBox v-model="showUnallocatedPtoTypes"
+                                  label="Show Unallocated PTO Types"
+                                  @update:modelValue="onFilterChange" />
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <TextColumn name="name"
+                    title="Name"
+                    field="name"
+                    :filter="textValueFilter"
+                    visiblePriority="xs" />
+
+        <TextColumn v-if="config.options?.showSupervisorFilter"
+                    name="supervisor"
+                    title="Supervisor"
+                    field="supervisor"
+                    :filter="textValueFilter"
+                    visiblePriority="md" />
+
+        <TextColumn v-if="config.options?.showMinistryAreaFilter"
+                    name="ministryArea"
+                    title="Ministry Area"
+                    field="ministryArea"
+                    :filter="textValueFilter"
+                    visiblePriority="md" />
+
+        <Column name="allocations"
+                title="Allocations"
+                width="30%"
+                visiblePriority="md">
+            <template #format="{ row }">
+                <div>
+                    <div v-for="(item, index) in (row.allocations ?? [])" :key="index" class="cell-line">{{ item }}</div>
+                </div>
+            </template>
+        </Column>
+
+        <Column name="totalAccrued"
+                title="Total Accrued"
+                visiblePriority="md">
+            <template #format="{ row }">
+                <div>
+                    <div v-for="(item, index) in (row.totalAccrued ?? [])" :key="index" class="cell-line">{{ item }}</div>
+                </div>
+            </template>
+        </Column>
+
+        <Column name="totalTaken"
+                title="Total Taken"
+                visiblePriority="md">
+            <template #format="{ row }">
+                <div>
+                    <div v-for="(item, index) in (row.totalTaken ?? [])" :key="index" class="cell-line">{{ item }}</div>
+                </div>
+            </template>
+        </Column>
+
+        <Column name="remaining"
+                title="Remaining"
+                visiblePriority="xs">
+            <template #format="{ row }">
+                <div>
+                    <div v-for="(item, index) in (row.remaining ?? [])" :key="index" class="cell-line" :class="{ 'text-danger': item.isNegative }">
+                        {{ item.text }}
+                    </div>
+                </div>
+            </template>
+        </Column>
+    </Grid>
+</template>
+
+<script setup lang="ts">
+import { onConfigurationValuesChanged, useConfigurationValues, useInvokeBlockAction, useReloadBlock } from "@Obsidian/Utility/block";
+import Grid, { Column, TextColumn, textValueFilter } from "@Obsidian/Controls/grid";
+import { ListBlockBox } from "@Obsidian/ViewModels/Blocks/listBlockBox";
+import { HrEmployeeListOptionsBag } from "./viewModels";
+import { GridDataBag } from "@Obsidian/ViewModels/Core/Grid/gridDataBag";
+import { NavigationUrlKey } from "./HrEmployeeList/types.partial";
+import { computed, reactive, ref } from "vue";
+import DropDownList from "@Obsidian/Controls/dropDownList.obs";
+import TextBox from "@Obsidian/Controls/textBox.obs";
+import CheckBox from "@Obsidian/Controls/checkBox.obs";
+import PersonPicker from "@Obsidian/Controls/personPicker.obs";
+import { ListItemBag } from "@Obsidian/ViewModels/Utility/listItemBag";
+
+const config = useConfigurationValues<ListBlockBox<HrEmployeeListOptionsBag>>();
+const invokeBlockAction = useInvokeBlockAction();
+
+// All blocks auto reload when changing block settings
+onConfigurationValuesChanged(useReloadBlock());
+
+// #region Values
+
+const entityTypeGuid = "72657ed8-d16e-492e-ac12-144c5e7567e7"; // Person entity type guid
+const gridDataSource = ref<Promise<GridDataBag>>();
+let gridData: GridDataBag | undefined;
+
+// Filter values
+const fiscalYearEnd = ref<string>("");
+const ptoTypeId = ref<string>("");
+const supervisor = ref<ListItemBag | undefined>(undefined);
+const ministryArea = ref<string>("");
+const showUnallocatedPtoTypes = ref<boolean>(false);
+
+// #endregion
+
+// #region Computed
+
+const ptoTypeItems = computed<ListItemBag[]>(() => {
+    return config.options?.ptoTypes ?? [];
+});
+
+const fiscalYearItems = computed<ListItemBag[]>(() => {
+    return config.options?.fiscalYears ?? [];
+});
+
+// #endregion
+
+// #region Functions
+
+/**
+ * Called when the grid is requesting the row data be loaded.
+ */
+async function loadGridData(): Promise<GridDataBag> {
+    const result = await invokeBlockAction<GridDataBag>("GetGridData", {
+        fiscalYearEnd: fiscalYearEnd.value ? parseInt(fiscalYearEnd.value) : null,
+        ptoTypeId: ptoTypeId.value ? parseInt(ptoTypeId.value) : null,
+        supervisorId: supervisor.value ? parseInt(supervisor.value.value ?? "0") : null,
+        ministryArea: ministryArea.value,
+        showUnallocatedPtoTypes: showUnallocatedPtoTypes.value
+    });
+
+    if (result.isSuccess && result.data) {
+        gridData = reactive(result.data);
+        return gridData;
+    }
+    else {
+        throw new Error(result.errorMessage ?? "Unknown error while trying to load grid data.");
+    }
+}
+
+// #endregion
+
+// #region Event Handlers
+
+/**
+ * Called when a row has been selected by the individual.
+ *
+ * @param key The key of the row that was selected.
+ */
+function onSelectItem(key: string): void {
+    if (config.navigationUrls?.[NavigationUrlKey.DetailPage]) {
+        window.location.href = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", key);
+    }
+}
+
+/**
+ * Called when any filter value changes.
+ */
+function onFilterChange(): void {
+    gridDataSource.value = loadGridData();
+}
+
+// #endregion
+
+// Load initial data
+gridDataSource.value = loadGridData();
+</script>
+
+<style scoped>
+.text-danger {
+    color: #d9534f;
+}
+
+.grid-filter-entry {
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+.cell-line {
+    display: block;
+}
+</style>

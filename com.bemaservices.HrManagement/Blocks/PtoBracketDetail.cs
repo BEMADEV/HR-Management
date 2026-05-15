@@ -87,7 +87,6 @@ namespace com.bemaservices.HrManagement.Blocks
                 PtoTypeOptions = new PtoTypeService( RockContext )
                     .Queryable()
                     .OrderBy( pt => pt.Name )
-                    .Select( pt => pt )
                     .ToList()
                     .Select( pt => pt.ToListItemBag() )
                     .ToList()

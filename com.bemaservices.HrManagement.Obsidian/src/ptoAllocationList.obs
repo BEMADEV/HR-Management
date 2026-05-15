@@ -1,4 +1,6 @@
 <template>
+    <NotificationBox v-if="resultMessage" :alertType="resultAlertType" v-html="resultMessage" @close="resultMessage = ''" dismissible />
+
     <Grid :definition="config.gridDefinition ?? undefined"
           :data="gridDataSource"
           keyField="idKey"
@@ -8,7 +10,47 @@
           liveUpdates
           :onAddItem="config.isAddEnabled ? onAddItem : undefined"
           @selectItem="onSelectItem">
+
+        <template #gridActions>
+            <DropDownList v-model="selectedAction"
+                         :items="actionItems"
+                         :showBlankItem="true"
+                         blankValue=""
+                         class="pull-left input-width-lg"
+                         @update:modelValue="onActionChange" />
+        </template>
+
         <SelectColumn />
+
+        <TextColumn name="person"
+                    title="Person"
+                    field="person"
+                    :filter="textValueFilter"
+                    visiblePriority="xs" />
+
+        <TextColumn name="ptoType"
+                    title="PTO Type"
+                    field="ptoType"
+                    :filter="textValueFilter"
+                    visiblePriority="xs" />
+
+        <TextColumn name="ptoAllocationSourceType"
+                    title="Source"
+                    field="ptoAllocationSourceType"
+                    :filter="pickExistingValueFilter"
+                    visiblePriority="xs" />
+
+        <NumberColumn name="hours"
+                       title="Total Hours"
+                       field="hours"
+                       :filter="numberValueFilter"
+                       visiblePriority="xs" />
+
+        <DateColumn name="startDate"
+                    title="Start Date"
+                    field="startDate"
+                    :filter="dateValueFilter"
+                    visiblePriority="xs" />
 
         <DateColumn name="endDate"
                     title="End Date"
@@ -16,41 +58,12 @@
                     :filter="dateValueFilter"
                     visiblePriority="xs" />
 
-        <NumberColumn name="hours"
-                       title="Hours"
-                       field="hours"
-                       :filter="numberValueFilter"
-                       visiblePriority="xs" />
-
-        <PersonColumn name=""
-                      title=""
-                      field=""
-                      :filter="pickExistingValueFilter"
-                      visiblePriority="xs" />
-
-        <LabelColumn name="ptoAllocationSourceType"
-                     title="Pto Allocation Source Type"
-                     field="ptoAllocationSourceType"
-                     :filter="pickExistingValueFilter"
-                     visiblePriority="xs" />
-
         <LabelColumn name="ptoAllocationStatus"
-                     title="Pto Allocation Status"
+                     title="Status"
                      field="ptoAllocationStatus"
                      :filter="pickExistingValueFilter"
+                     :classSource="{ Active: 'info', Inactive: 'default', Pending: 'warning', Denied: 'danger' }"
                      visiblePriority="xs" />
-
-        <TextColumn name="ptoType"
-                    title="Pto Type"
-                    field="ptoType"
-                    :filter="textValueFilter"
-                    visiblePriority="xs" />
-
-        <DateColumn name="startDate"
-                    title="Start Date"
-                    field="startDate"
-                    :filter="dateValueFilter"
-                    visiblePriority="xs" />
 
         <AttributeColumns :attributes="config.gridDefinition?.attributeFields ?? []" />
 
@@ -60,13 +73,16 @@
 
 <script setup lang="ts">
 import { onConfigurationValuesChanged, useConfigurationValues, useInvokeBlockAction, useReloadBlock } from "@Obsidian/Utility/block";
-import Grid, { AttributeColumns, DateColumn, dateValueFilter, LabelColumn, NumberColumn, numberValueFilter, PersonColumn, pickExistingValueFilter, TextColumn, textValueFilter, DeleteColumn, SelectColumn } from "@Obsidian/Controls/grid";
-import { alert } from "@Obsidian/Utility/dialogs";
+import Grid, { AttributeColumns, DateColumn, dateValueFilter, LabelColumn, NumberColumn, numberValueFilter, pickExistingValueFilter, TextColumn, textValueFilter, DeleteColumn, SelectColumn } from "@Obsidian/Controls/grid";
+import { alert, confirm } from "@Obsidian/Utility/dialogs";
 import { ListBlockBox } from "@Obsidian/ViewModels/Blocks/listBlockBox";
 import { PtoAllocationListOptionsBag } from "./viewModels";
 import { GridDataBag } from "@Obsidian/ViewModels/Core/Grid/gridDataBag";
 import { NavigationUrlKey } from "./PtoAllocationList/types.partial";
 import { reactive, ref } from "vue";
+import NotificationBox from "@Obsidian/Controls/notificationBox.obs";
+import DropDownList from "@Obsidian/Controls/dropDownList.obs";
+import { ListItemBag } from "@Obsidian/ViewModels/Utility/listItemBag";
 
 const config = useConfigurationValues<ListBlockBox<PtoAllocationListOptionsBag>>();
 const invokeBlockAction = useInvokeBlockAction();
@@ -80,6 +96,14 @@ onConfigurationValuesChanged(useReloadBlock());
 
 const gridDataSource = ref<Promise<GridDataBag>>();
 let gridData: GridDataBag | undefined;
+const selectedAction = ref<string>("");
+const resultMessage = ref<string>("");
+const resultAlertType = ref<"success" | "danger" | "warning" | "info">("success");
+
+const actionItems: ListItemBag[] = [
+    { value: "ACTIVATE", text: "Activate" },
+    { value: "INACTIVATE", text: "Inactivate" }
+];
 
 // #endregion
 
@@ -145,6 +169,52 @@ function onAddItem(): void {
     if (config.navigationUrls?.[NavigationUrlKey.DetailPage]) {
         window.location.href = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", "0");
     }
+}
+
+/**
+ * Called when the action dropdown value changes.
+ */
+async function onActionChange(): Promise<void> {
+    if (!selectedAction.value || !gridData || !gridData.rows) {
+        return;
+    }
+
+    // Get selected row keys
+    const selectedKeys = gridData.rows
+        .filter((row: any) => row.__isSelected)
+        .map((row: any) => row.idKey);
+
+    if (selectedKeys.length === 0) {
+        selectedAction.value = "";
+        return;
+    }
+
+    const actionText = selectedAction.value === "ACTIVATE" ? "activate" : "inactivate";
+    const confirmed = await confirm(
+        `Are you sure you want to ${actionText} the selected allocations?`
+    );
+
+    if (!confirmed) {
+        selectedAction.value = "";
+        return;
+    }
+
+    const result = await invokeBlockAction<{ count: number, status: string }>("BulkStatusUpdate", {
+        keys: selectedKeys,
+        action: selectedAction.value
+    });
+
+    if (result.isSuccess && result.data) {
+        resultMessage.value = `${result.data.count} allocations were ${actionText}d.`;
+        resultAlertType.value = "success";
+        gridDataSource.value = loadGridData();
+    }
+    else {
+        resultMessage.value = result.errorMessage ?? "Unknown error while trying to update allocations.";
+        resultAlertType.value = "danger";
+    }
+
+    selectedAction.value = "";
 }
 
 // #endregion
