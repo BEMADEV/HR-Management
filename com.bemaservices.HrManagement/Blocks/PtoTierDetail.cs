@@ -396,6 +396,23 @@ namespace com.bemaservices.HrManagement.Blocks
                 return actionError;
             }
 
+            // Delete all brackets under this tier (and their bracket types)
+            var ptoBracketService = new PtoBracketService( RockContext );
+            var ptoBracketTypeService = new PtoBracketTypeService( RockContext );
+            var brackets = ptoBracketService.Queryable().Where( b => b.PtoTierId == entity.Id ).ToList();
+
+            foreach ( var bracket in brackets )
+            {
+                // Delete bracket types for this bracket
+                var bracketTypes = ptoBracketTypeService.Queryable().Where( bt => bt.PtoBracketId == bracket.Id ).ToList();
+                foreach ( var bracketType in bracketTypes )
+                {
+                    ptoBracketTypeService.Delete( bracketType );
+                }
+
+                ptoBracketService.Delete( bracket );
+            }
+
             entityService.Delete( entity );
             RockContext.SaveChanges();
 

@@ -82,7 +82,7 @@ namespace com.bemaservices.HrManagement.Blocks
             var builder = GetGridBuilder();
 
             box.IsAddEnabled = GetIsAddEnabled();
-            box.IsDeleteEnabled = false;
+            box.IsDeleteEnabled = GetIsDeleteEnabled();
             box.ExpectedRowCount = null;
             box.NavigationUrls = GetBoxNavigationUrls();
             box.Options = GetBoxOptions();
@@ -107,6 +107,17 @@ namespace com.bemaservices.HrManagement.Blocks
         /// </summary>
         /// <returns>A boolean value that indicates if the add button should be enabled.</returns>
         private bool GetIsAddEnabled()
+        {
+            var entity = new PtoBracket();
+
+            return entity.IsAuthorized( Authorization.EDIT, RequestContext.CurrentPerson );
+        }
+
+        /// <summary>
+        /// Determines if the delete button should be enabled in the grid.
+        /// </summary>
+        /// <returns>A boolean value that indicates if the delete button should be enabled.</returns>
+        private bool GetIsDeleteEnabled()
         {
             var entity = new PtoBracket();
 
@@ -188,6 +199,41 @@ namespace com.bemaservices.HrManagement.Blocks
         #endregion
 
         #region Block Actions
+
+        /// <summary>
+        /// Deletes the specified entity.
+        /// </summary>
+        /// <param name="key">The identifier of the entity to be deleted.</param>
+        /// <returns>An empty result that indicates if the operation succeeded.</returns>
+        [BlockAction]
+        public BlockActionResult Delete( string key )
+        {
+            var entityService = new PtoBracketService( RockContext );
+            var entity = entityService.Get( key, !PageCache.Layout.Site.DisablePredictableIds );
+
+            if ( entity == null )
+            {
+                return ActionBadRequest( $"{PtoBracket.FriendlyTypeName} not found." );
+            }
+
+            if ( !entity.IsAuthorized( Authorization.EDIT, RequestContext.CurrentPerson ) )
+            {
+                return ActionBadRequest( $"Not authorized to delete {PtoBracket.FriendlyTypeName}." );
+            }
+
+            // Delete any bracket types tied to this bracket
+            var ptoBracketTypeService = new PtoBracketTypeService( RockContext );
+            var bracketTypes = ptoBracketTypeService.Queryable().Where( bt => bt.PtoBracketId == entity.Id ).ToList();
+            foreach ( var bracketType in bracketTypes )
+            {
+                ptoBracketTypeService.Delete( bracketType );
+            }
+
+            entityService.Delete( entity );
+            RockContext.SaveChanges();
+
+            return ActionOk();
+        }
 
         #endregion
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data.Entity;
 using System.Linq;
 
 using Rock;
@@ -184,8 +185,9 @@ namespace com.bemaservices.HrManagement.Blocks
                 MaximumYear = entity.MaximumYear,
                 MinimumYear = entity.MinimumYear,
                 PtoBracketTypes = ( entity.Id == 0
-                    ? new List<PtoBracketType>()
+                    ? entity.PtoBracketTypes?.ToList() ?? new List<PtoBracketType>()
                     : new PtoBracketTypeService( RockContext ).Queryable()
+                        .Include( pbt => pbt.PtoType )
                         .Where( pbt => pbt.PtoBracketId == entity.Id )
                         .ToList() )
                     .Select( pbt => new PtoBracketTypeBag
@@ -286,10 +288,9 @@ namespace com.bemaservices.HrManagement.Blocks
                             existingPtoBracketType = new PtoBracketType
                             {
                                 Guid = incomingGuid,
-                                PtoBracket = entity
                             };
 
-                            ptoBracketTypeService.Add( existingPtoBracketType );
+                            entity.PtoBracketTypes.Add( existingPtoBracketType );
                         }
 
                         var ptoTypeId = incomingPtoBracketType.PtoType.GetEntityId<PtoType>( RockContext );
@@ -355,6 +356,17 @@ namespace com.bemaservices.HrManagement.Blocks
             {
                 // Create a new entity.
                 entity = new PtoBracket();
+
+                var ptoTierId = PageParameter( PageParameterKey.PtoTierId ).AsIntegerOrNull();
+                if ( ptoTierId.HasValue )
+                {
+                    entity.PtoTierId = ptoTierId.Value;
+                }
+                else
+                {
+                    entity.PtoTier = new PtoTierService( RockContext ).Get( PageParameter( PageParameterKey.PtoTierId ) );
+                }
+
                 entityService.Add( entity );
             }
 
