@@ -43,6 +43,12 @@ namespace com.bemaservices.HrManagement.Migrations
         {
             AddNewBlockTypes();
             SwitchBlockTypes();
+            UpdatePersonDetailLayout();
+        }
+
+        private void UpdatePersonDetailLayout()
+        {
+            RockMigrationHelper.UpdatePageLayout( "34A9F1E4-8249-4F39-B861-F28210E8C70A", "6AD84AFC-B3A1-4E30-B53B-C6E57B513839" );
         }
 
         private void SwitchBlockTypes()

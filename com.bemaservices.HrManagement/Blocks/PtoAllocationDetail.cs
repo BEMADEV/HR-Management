@@ -118,39 +118,41 @@ namespace com.bemaservices.HrManagement.Blocks
         private void SetBoxInitialEntityState( DetailBlockBox<PtoAllocationBag, PtoAllocationDetailOptionsBag> box )
         {
             var entity = GetInitialEntity();
+            var ptoAllocationId = PageParameter( PageParameterKey.PtoAllocationId );
 
             if ( entity == null )
             {
-                box.ErrorMessage = $"The {PtoAllocation.FriendlyTypeName} was not found.";
-                return;
-            }
-
-            var isViewable = entity.IsAuthorized( Authorization.VIEW, RequestContext.CurrentPerson );
-            box.IsEditable = entity.IsAuthorized( Authorization.EDIT, RequestContext.CurrentPerson );
-
-            if ( entity.Id != 0 )
-            {
-                // Existing entity was found, prepare for view mode by default.
-                if ( isViewable )
+                if ( ptoAllocationId.IsNullOrWhiteSpace() )
                 {
-                    box.Entity = GetEntityBagForView( entity );
+                    // No page parameter means this is a create flow.
+                    entity = new PtoAllocation();
                 }
                 else
                 {
-                    box.ErrorMessage = EditModeMessage.NotAuthorizedToView( PtoAllocation.FriendlyTypeName );
+                    box.ErrorMessage = $"The {PtoAllocation.FriendlyTypeName} was not found.";
+                    return;
                 }
+            }
+
+            // For new entities, check if user is authorized to edit the entity type
+            // For existing entities, check if user is authorized to edit the specific entity
+            if ( entity.Id == 0 )
+            {
+                box.IsEditable = BlockCache.IsAuthorized( Authorization.EDIT, RequestContext.CurrentPerson );
             }
             else
             {
-                // New entity is being created, prepare for edit mode by default.
-                if ( box.IsEditable )
-                {
-                    box.Entity = GetEntityBagForEdit( entity );
-                }
-                else
-                {
-                    box.ErrorMessage = EditModeMessage.NotAuthorizedToEdit( PtoAllocation.FriendlyTypeName );
-                }
+                box.IsEditable = entity.IsAuthorized( Authorization.EDIT, RequestContext.CurrentPerson );
+            }
+
+            // Always prepare for edit mode.
+            if ( box.IsEditable )
+            {
+                box.Entity = GetEntityBagForEdit( entity );
+            }
+            else
+            {
+                box.ErrorMessage = EditModeMessage.NotAuthorizedToEdit( PtoAllocation.FriendlyTypeName );
             }
 
             PrepareDetailBox( box, entity );
@@ -268,18 +270,7 @@ namespace com.bemaservices.HrManagement.Blocks
         /// <inheritdoc/>
         protected override PtoAllocation GetInitialEntity()
         {
-            var entity = GetInitialEntity<PtoAllocation, PtoAllocationService>( RockContext, PageParameterKey.PtoAllocationId );
-
-            if ( entity != null )
-            {
-                // Load related entities
-                var service = new PtoAllocationService( RockContext );
-                entity = service.Queryable()
-                    .Where( a => a.Id == entity.Id )
-                    .FirstOrDefault();
-            }
-
-            return entity;
+            return GetInitialEntity<PtoAllocation, PtoAllocationService>( RockContext, PageParameterKey.PtoAllocationId );
         }
 
         /// <summary>
@@ -385,33 +376,14 @@ namespace com.bemaservices.HrManagement.Blocks
                 return ActionBadRequest( validationMessage );
             }
 
-            var isNew = entity.Id == 0;
-
             RockContext.WrapTransaction( () =>
             {
                 RockContext.SaveChanges();
                 entity.SaveAttributeValues( RockContext );
             } );
 
-            if ( isNew )
-            {
-                return ActionContent( System.Net.HttpStatusCode.Created, this.GetCurrentPageUrl( new Dictionary<string, string>
-                {
-                    [PageParameterKey.PtoAllocationId] = entity.IdKey
-                } ) );
-            }
-
-            // Ensure navigation properties will work now.
-            entity = entityService.Get( entity.Id );
-            entity.LoadAttributes( RockContext );
-
-            var bag = GetEntityBagForEdit( entity );
-
-            return ActionOk( new ValidPropertiesBox<PtoAllocationBag>
-            {
-                Bag = bag,
-                ValidProperties = bag.GetType().GetProperties().Select( p => p.Name ).ToList()
-            } );
+            // Always return to parent page after save.
+            return ActionContent( System.Net.HttpStatusCode.Created, this.GetParentPageUrl() );
         }
 
         /// <summary>

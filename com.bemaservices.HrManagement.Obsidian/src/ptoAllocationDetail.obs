@@ -156,20 +156,16 @@ const options = computed((): PtoAllocationDetailOptionsBag => {
 
 /**
  * Event handler for the Cancel button being clicked while in Edit mode.
- * Handles redirect to parent page if creating a new entity.
+ * Handles redirect to parent page.
  *
  * @returns true if the panel should leave edit mode; false if it should stay in edit mode; or a string containing a redirect URL.
  */
 async function onCancelEdit(): Promise<boolean | string> {
-    if (!ptoAllocationEditBag.value.bag?.idKey) {
-        if (config.navigationUrls?.[NavigationUrlKey.ParentPage]) {
-            return config.navigationUrls[NavigationUrlKey.ParentPage];
-        }
-
-        return false;
+    if (config.navigationUrls?.[NavigationUrlKey.ParentPage]) {
+        return config.navigationUrls[NavigationUrlKey.ParentPage];
     }
 
-    return true;
+    return false;
 }
 
 /**
@@ -221,24 +217,19 @@ async function onEdit(): Promise<boolean> {
 
 /**
  * Event handler for the panel's Save event. Send the data to the server
- * to be saved and then leave edit mode or redirect to target page.
+ * to be saved and then redirect to parent page.
  *
  * @returns true if the panel should leave edit mode; false if it should stay in edit mode; or a string containing a redirect URL.
  */
 async function onSave(): Promise<boolean | string> {
     errorMessage.value = "";
 
-    const result = await invokeBlockAction<ValidPropertiesBox<PtoAllocationBag> | string>("Save", {
+    const result = await invokeBlockAction<string>("Save", {
         box: ptoAllocationEditBag.value
     });
 
     if (result.isSuccess && result.data) {
-        if (result.statusCode === 200 && typeof result.data === "object") {
-            ptoAllocationViewBag.value = result.data.bag;
-
-            return true;
-        }
-        else if (result.statusCode === 201 && typeof result.data === "string") {
+        if (result.statusCode === 201 && typeof result.data === "string") {
             return result.data;
         }
     }
@@ -250,15 +241,19 @@ async function onSave(): Promise<boolean | string> {
 
 // #endregion
 
-// Handle any initial error conditions or the need to go into edit mode.
+// Handle any initial error conditions or go straight into edit mode.
 if (config.errorMessage) {
     blockError.value = config.errorMessage;
 }
 else if (!config.entity) {
     blockError.value = "The specified pto allocation could not be viewed.";
 }
-else if (!config.entity.idKey) {
-    ptoAllocationEditBag.value = { bag: config.entity };
-    panelMode.value = DetailPanelMode.Add;
+else {
+    // Always start in edit mode
+    ptoAllocationEditBag.value = { 
+        bag: config.entity,
+        validProperties: config.entity ? Object.keys(config.entity) : []
+    };
+    panelMode.value = config.entity.idKey ? DetailPanelMode.Edit : DetailPanelMode.Add;
 }
 </script>

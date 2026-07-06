@@ -45,14 +45,13 @@
                      :classSource="{ Approved: 'success', Pending: 'warning', Denied: 'danger', Cancelled: 'default' }"
                      visiblePriority="xs" />
 
-        <DeleteColumn v-if="config.isDeleteEnabled" @click="onDeleteClick" />
+        <DeleteColumn v-if="config.isDeleteEnabled" @click="onDeleteClick" :disableConfirmation="true" />
     </Grid>
 </template>
 
 <script setup lang="ts">
 import { onConfigurationValuesChanged, useConfigurationValues, useInvokeBlockAction, useReloadBlock } from "@Obsidian/Utility/block";
 import Grid, { DateColumn, dateValueFilter, LabelColumn, NumberColumn, numberValueFilter, pickExistingValueFilter, TextColumn, textValueFilter, DeleteColumn } from "@Obsidian/Controls/grid";
-import { confirm } from "@Obsidian/Utility/dialogs";
 import { ListBlockBox } from "@Obsidian/ViewModels/Blocks/listBlockBox";
 import { PtoRequestListOptionsBag } from "./viewModels";
 import { GridDataBag } from "@Obsidian/ViewModels/Core/Grid/gridDataBag";
@@ -126,11 +125,6 @@ function onAddItem(): void {
  * Called when the delete button is clicked for a row.
  */
 async function onDeleteClick(key: string): Promise<void> {
-    const confirmed = await confirm("Are you sure you want to cancel this PTO request?");
-    if (!confirmed) {
-        return;
-    }
-
     if (config.navigationUrls?.[NavigationUrlKey.WorkflowEntryPage] && gridData?.rows) {
         const row = gridData.rows.find(r => r["idKey"] === key);
         if (row) {

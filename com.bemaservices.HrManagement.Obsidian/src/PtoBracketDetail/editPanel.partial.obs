@@ -194,7 +194,7 @@ watch(() => props.modelValue, () => {
 
 // Determines which values we want to track changes on (defined in the
 // array) and then emit a new object defined as newValue.
-watch([attributeValues, ...propRefs], () => {
+watch([attributeValues, ptoBracketTypes, ...propRefs], () => {
     const newValue: ValidPropertiesBox<PtoBracketEditBag> = {
         bag: { ...props.modelValue.bag } as PtoBracketEditBag
     };
@@ -206,7 +206,7 @@ watch([attributeValues, ...propRefs], () => {
     setPropertiesBoxValue(newValue, "ptoBracketTypes", ptoBracketTypes.value);
 
     emit("update:modelValue", newValue);
-});
+}, { deep: true });
 
 watch(ptoBracketTypes, () => {
     emit("propertyChanged", "PtoBracketTypes");

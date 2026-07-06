@@ -254,6 +254,48 @@ namespace com.bemaservices.HrManagement.Blocks
             }
         }
 
+        /// <summary>
+        /// Deletes the specified PTO request by redirecting to the workflow with cancel parameter.
+        /// </summary>
+        /// <param name="key">The identifier of the row to delete.</param>
+        /// <returns>An empty result.</returns>
+        [BlockAction]
+        public BlockActionResult Delete( string key )
+        {
+            if ( !GetEditRights() )
+            {
+                return ActionBadRequest( "Not authorized to delete PTO requests." );
+            }
+
+            using ( var rockContext = new RockContext() )
+            {
+                var ptoRequestService = new PtoRequestService( rockContext );
+                var ptoRequest = ptoRequestService.Get( key, !PageCache.Layout.Site.DisablePredictableIds );
+
+                if ( ptoRequest == null )
+                {
+                    return ActionBadRequest( "PTO request not found." );
+                }
+
+                var workflowTypeGuid = GetAttributeValue( AttributeKey.PtoRequestWorkflow ).AsGuidOrNull();
+                if ( !workflowTypeGuid.HasValue )
+                {
+                    return ActionBadRequest( "PTO Request Workflow is not configured." );
+                }
+
+                var workflowType = WorkflowTypeCache.Get( workflowTypeGuid.Value );
+                if ( workflowType == null )
+                {
+                    return ActionBadRequest( "PTO Request Workflow not found." );
+                }
+
+                var workflowEntryRoute = GetAttributeValue( AttributeKey.WorkflowEntryPageRoute );
+                var url = $"/{workflowEntryRoute}/{workflowType.Id}?PTORequest={ptoRequest.Guid}&CancelRequest=Yes";
+
+                return ActionOk( new { redirectUrl = url } );
+            }
+        }
+
         #endregion
     }
 }
