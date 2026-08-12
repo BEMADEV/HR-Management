@@ -216,13 +216,6 @@ gridDataSource.value = loadGridData();
     color: #d9534f;
 }
 
-.grid-filter-entry {
-    padding: 15px;
-    background-color: #f5f5f5;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 10px;
-}
-
 .cell-line {
     display: block;
 }
