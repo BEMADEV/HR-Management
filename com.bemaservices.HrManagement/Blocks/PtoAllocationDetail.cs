@@ -290,9 +290,10 @@ namespace com.bemaservices.HrManagement.Blocks
         {
             var entityService = new PtoAllocationService( RockContext );
             error = null;
+            var isNew = idKey.IsNullOrWhiteSpace();
 
             // Determine if we are editing an existing entity or creating a new one.
-            if ( idKey.IsNotNullOrWhiteSpace() )
+            if ( !isNew )
             {
                 // If editing an existing entity then load it and make sure it
                 // was found and can still be edited.
@@ -311,7 +312,15 @@ namespace com.bemaservices.HrManagement.Blocks
                 return false;
             }
 
-            if ( !entity.IsAuthorized( Authorization.EDIT, RequestContext.CurrentPerson ) )
+            if ( isNew )
+            {
+                if ( !BlockCache.IsAuthorized( Authorization.EDIT, RequestContext.CurrentPerson ) )
+                {
+                    error = ActionBadRequest( $"Not authorized to edit ${PtoAllocation.FriendlyTypeName}." );
+                    return false;
+                }
+            }
+            else if ( !entity.IsAuthorized( Authorization.EDIT, RequestContext.CurrentPerson ) )
             {
                 error = ActionBadRequest( $"Not authorized to edit ${PtoAllocation.FriendlyTypeName}." );
                 return false;

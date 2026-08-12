@@ -93,9 +93,7 @@ namespace com.bemaservices.HrManagement.Blocks
         /// <returns>A boolean value that indicates if the add button should be enabled.</returns>
         private bool GetIsAddEnabled()
         {
-            var entity = new PtoAllocation();
-
-            return entity.IsAuthorized( Authorization.EDIT, RequestContext.CurrentPerson );
+            return BlockCache.IsAuthorized( Authorization.EDIT, RequestContext.CurrentPerson );
         }
 
         /// <summary>
