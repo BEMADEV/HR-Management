@@ -167,7 +167,14 @@ async function onDeleteClick(key: string): Promise<void> {
  */
 function onAddItem(): void {
     if (config.navigationUrls?.[NavigationUrlKey.DetailPage]) {
-        window.location.href = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", "0");
+        let url = config.navigationUrls[NavigationUrlKey.DetailPage].replace("((Key))", "0");
+
+        if (config.options?.contextPersonId) {
+            const separator = url.includes("?") ? "&" : "?";
+            url += `${separator}PersonId=${config.options.contextPersonId}`;
+        }
+
+        window.location.href = url;
     }
 }
 

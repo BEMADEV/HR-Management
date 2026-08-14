@@ -49,12 +49,40 @@ namespace com.bemaservices.HrManagement.Blocks
             public const string DetailPage = "DetailPage";
         }
 
+        private static class PageParameterKey
+        {
+            public const string PersonId = "PersonId";
+        }
+
         #endregion Keys
 
         #region Properties
 
         /// <inheritdoc/>
         public override string ObsidianFileUrl => "~/Plugins/com_bemaservices/HrManagement/ptoAllocationList.obs";
+
+        /// <summary>
+        /// Gets the person from page parameter or context.
+        /// </summary>
+        private Person ContextPerson
+        {
+            get
+            {
+                var contextEntity = RequestContext.GetContextEntity<Person>();
+                if ( contextEntity != null )
+                {
+                    return contextEntity;
+                }
+
+                var personId = RequestContext.GetPageParameter( PageParameterKey.PersonId ).AsIntegerOrNull();
+                if ( personId.HasValue )
+                {
+                    return new PersonService( RockContext ).Get( personId.Value );
+                }
+
+                return null;
+            }
+        }
 
         #endregion
 
@@ -84,6 +112,8 @@ namespace com.bemaservices.HrManagement.Blocks
         {
             var options = new PtoAllocationListOptionsBag();
 
+            options.ContextPersonId = ContextPerson?.Id;
+
             return options;
         }
 
@@ -111,9 +141,16 @@ namespace com.bemaservices.HrManagement.Blocks
         /// <inheritdoc/>
         protected override IQueryable<PtoAllocation> GetListQueryable( RockContext rockContext )
         {
-            return base.GetListQueryable( rockContext )
+            var qry = base.GetListQueryable( rockContext )
                 .Include( a => a.PersonAlias )
                 .Include( a => a.PtoType );
+
+            if ( ContextPerson != null )
+            {
+                qry = qry.Where( a => a.PersonAlias.PersonId == ContextPerson.Id );
+            }
+
+            return qry;
         }
 
         /// <inheritdoc/>

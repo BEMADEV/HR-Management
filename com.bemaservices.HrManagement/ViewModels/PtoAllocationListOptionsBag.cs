@@ -5,5 +5,9 @@ namespace com.bemaservices.HrManagement.ViewModels
     /// </summary>
     public class PtoAllocationListOptionsBag
     {
+        /// <summary>
+        /// Gets or sets the context person identifier.
+        /// </summary>
+        public int? ContextPersonId { get; set; }
     }
 }

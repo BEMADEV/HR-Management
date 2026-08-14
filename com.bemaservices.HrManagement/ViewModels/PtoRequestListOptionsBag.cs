@@ -11,8 +11,8 @@ namespace com.bemaservices.HrManagement.ViewModels
         public bool HasPersonContext { get; set; }
 
         /// <summary>
-        /// Gets or sets the context person's IdKey.
+        /// Gets or sets the context person's primary alias guid.
         /// </summary>
-        public string ContextPersonIdKey { get; set; }
+        public string ContextPersonAliasGuid { get; set; }
     }
 }

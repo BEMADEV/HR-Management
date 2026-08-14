@@ -33,6 +33,7 @@ export type PtoAllocationDetailOptionsBag = {
 };
 
 export type PtoAllocationListOptionsBag = {
+    contextPersonId?: number | null;
 };
 
 export type PtoBracketBag = {
@@ -61,7 +62,7 @@ export type PtoBracketListOptionsBag = {
 export type PtoRequestListOptionsBag = {
     hasPersonContext: boolean;
 
-    contextPersonIdKey?: string | null;
+    contextPersonAliasGuid?: string | null;
 };
 
 export type PtoTierBag = {

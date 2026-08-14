@@ -113,9 +113,9 @@ function onSelectItem(key: string): void {
 function onAddItem(): void {
     if (config.navigationUrls?.[NavigationUrlKey.WorkflowEntryPage]) {
         let url = config.navigationUrls[NavigationUrlKey.WorkflowEntryPage];
-        if (config.options?.contextPersonIdKey) {
-            // If we have a person context, pass the person's alias guid
-            url += `?Person=${config.options.contextPersonIdKey}`;
+        if (config.options?.contextPersonAliasGuid) {
+            // If we have a person context, pass the person's primary alias guid.
+            url += `?Person=${config.options.contextPersonAliasGuid}`;
         }
         window.location.href = url;
     }

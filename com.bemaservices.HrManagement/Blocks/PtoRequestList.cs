@@ -136,7 +136,7 @@ namespace com.bemaservices.HrManagement.Blocks
             options.HasPersonContext = ContextPerson != null;
             if ( ContextPerson != null )
             {
-                options.ContextPersonIdKey = ContextPerson.IdKey;
+                options.ContextPersonAliasGuid = ContextPerson.PrimaryAlias?.Guid.ToString();
             }
 
             return options;
