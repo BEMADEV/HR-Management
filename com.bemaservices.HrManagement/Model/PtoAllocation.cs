@@ -125,7 +125,9 @@ namespace com.bemaservices.HrManagement.Model
         /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
         public override string ToString()
         {
-            return PtoType.Name + " " + this.StartDate.ToString( "M/yyyy") + ( this.EndDate.HasValue ? " - " + this.EndDate.Value.ToString("M/yyyy") : string.Empty ); 
+            var ptoTypeName = PtoType?.Name ?? "PTO Allocation";
+
+            return ptoTypeName + " " + this.StartDate.ToString( "M/yyyy" ) + ( this.EndDate.HasValue ? " - " + this.EndDate.Value.ToString( "M/yyyy" ) : string.Empty );
         }
 
         #endregion
